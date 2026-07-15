@@ -1,6 +1,6 @@
---- Portfile.orig	2025-04-30 11:08:03.000000000 +0200
-+++ Portfile	2023-11-04 17:46:40.000000000 +0100
-@@ -1,7 +1,7 @@
+--- Portfile.orig	2026-07-13 21:35:09
++++ Portfile	2026-07-15 14:50:39
+@@ -1,120 +1,101 @@
  # -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
  
  PortSystem              1.0
@@ -9,7 +9,10 @@
  if {${os.major} <= 17} {
      PortGroup           muniversal 1.0
  }
-@@ -12,112 +12,89 @@
+ PortGroup               clang_dependency 1.0
++PortGroup               compiler_blacklist_versions 1.0
+ 
+ name                    libomp
  maintainers             {eborisch @eborisch} openmaintainer
  homepage                https://openmp.llvm.org
  description             The OpenMP subproject of LLVM
@@ -45,7 +48,7 @@
 +        livecheck.regex {"llvmorg-([0-9.]+)".*}
 +    }
  
--    version             20.1.1
+-    version             21.1.7
      revision            0
  
 -    livecheck.regex {"llvmorg-([0-9.]+)".*}
@@ -53,16 +56,14 @@
 -    distname        openmp-${version}.src
 -    distfiles       ${distname}.tar.xz cmake-${version}.src.tar.xz
 -
--    checksums \
--        openmp-20.1.1.src.tar.xz \
--        rmd160  67ccc02cad70b9f4714e0a7d200ab2ec20eaeca5 \
--        sha256  a5d2bba7bc4e7d159ce3fe8d09bdadeb59ff00af967b0a2bf5993fc1528f569e \
--        size    1093888 \
--        cmake-20.1.1.src.tar.xz \
--        rmd160  49696af4a2acec9d52919ca16a9dbeaac2150d1d \
--        sha256  b5988c9e3df3a61249fa82db54061f733756e74f73dfb299ff6314873a732d61 \
--        size    8648 
--
+-    checksums       openmp-${version}.src.tar.xz \
+-                    rmd160  4b924fe8645599724819c76373520464a5bdecc3 \
+-                    sha256  0f892ed2e85e1a9bc9f55699aec0a5a020c9f0a77ce8d29fb4cdf3aee1b72033 \
+-                    size    1101684 \
+-                    cmake-${version}.src.tar.xz \
+-                    rmd160  5a2ab2e6fd5ebdeeeee51ca4bd7fd044191d2cf9 \
+-                    sha256  f25ca011e4453ac035e940aa729d482d08eb83a91b4aaf1f230dc9ea28cadfa4 \
+-                    size    8980
      if {${os.major} <= 12} {
          # kmp_alloc.c includes <atomic> but libc++ is not the default on
          # these systems. https://trac.macports.org/ticket/52554
@@ -104,8 +105,9 @@
 +    set rtpath              "runtime/"
 +    
 +    # D88252 is to enable arm64 support
-+    patchfiles-append       patch-libomp-use-gettid-on-Leopard.diff \
-+                            reviews.llvm.org_D88252.diff
++    patchfiles-append       patch-libomp11-use-gettid-on-Leopard.diff \
++                            reviews.llvm.org_D88252.diff \
++                            patch-libomp11-add-kmpc_dispatch_deinit.diff
  
 -    livecheck.url       https://api.github.com/repos/llvm/llvm-project/tags
 +    livecheck.url           https://api.github.com/repos/llvm/llvm-project/tags
@@ -116,7 +118,15 @@
 -    # Change github.tarball_from to 'releases' or 'archive' next update
 -    github.tarball_from tarball
 -    name            libomp
--
++    if { ${subport} eq "libomp-devel" } {
++        version                 291764
++        replaced_by             libomp
++    } else {
++        PortGroup               github 1.0
++        # Last version working on libstdc++
++        github.setup            llvm-mirror openmp 381 svn-tags/RELEASE_
++        name                    libomp
+ 
 -    worksrcdir      openmp-${version}/final/runtime
 -    version         3.8.1
 -    checksums       rmd160  a41054068a127ef84610afef8090109078cb6c46 \
@@ -131,15 +141,6 @@
 -
 -    depends_build-append    port:perl5
 -    livecheck.type      none
-+    if { ${subport} eq "libomp-devel" } {
-+        version                 291764
-+        replaced_by             libomp
-+    } else {
-+        PortGroup               github 1.0
-+        # Last version working on libstdc++
-+        github.setup            llvm-mirror openmp 381 svn-tags/RELEASE_
-+        name                    libomp
-+
 +        worksrcdir              openmp-${version}/final/runtime
 +        version                 3.8.1
 +        checksums \
@@ -171,21 +172,23 @@
  if {${os.major} <= 17} {
      default_variants    +universal
  }
-@@ -135,44 +112,32 @@
+@@ -132,53 +113,41 @@
  # With this, cmake sets the correct library name in the dylibs for the
  # final destination we move them to
  configure.args-append   -DCMAKE_INSTALL_RPATH=${prefix}/lib/libomp \
 -                        -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib/libomp
--
++                        -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib/libomp \
++                        -DLIBOMP_OMPT_SUPPORT=FALSE
+ 
 -if {${os.major} <= 10} {
 -    set hnames              {omp.h}
 -    configure.args-append   -DLIBOMP_OMPT_SUPPORT=FALSE
 -} else {
 -    set hnames              {omp-tools.h omp.h ompt.h ompx.h}
 -}
-+                        -DCMAKE_INSTALL_NAME_DIR=${prefix}/lib/libomp \
-+                        -DLIBOMP_OMPT_SUPPORT=FALSE
- 
+-
+-set lnames {libiomp5.dylib libomp.dylib libgomp.dylib libgomp.1.dylib}
+-
  variant top_level description \
      "Install (links to) omp.h and libs into ${prefix}/(include|lib)" {}
  
@@ -209,22 +212,24 @@
 -
 +    move ${instdest}/tmp/include/omp.h ${instdest}/include/libomp/
      xinstall -d ${instdest}/lib/libomp
+-    foreach p ${lnames} {
 +
-     foreach p {libiomp5.dylib libomp.dylib libgomp.dylib} {
++    foreach p {libiomp5.dylib libomp.dylib libgomp.dylib} {
          move ${instdest}/tmp/lib/${p} ${instdest}/lib/libomp/
      }
  
      if {[variant_isset top_level]} {
 -        foreach h ${hnames} {
--            system -W ${instdest}/include \
--              "ln -s libomp/${h}"
--        }
+-            ln -s libomp/${h} ${instdest}/include/${h}
 +        system -W ${instdest}/include \
 +          "ln -s libomp/omp.h"
-         foreach p {libiomp5.dylib libomp.dylib libgomp.dylib} {
-             system -W ${instdest}/lib/ \
-               "ln -s libomp/${p}"
-@@ -180,8 +145,8 @@
++        foreach p {libiomp5.dylib libomp.dylib libgomp.dylib} {
++            system -W ${instdest}/lib/ \
++              "ln -s libomp/${p}"
+         }
+-        foreach p ${lnames} {
+-            ln -s libomp/${p} ${instdest}/lib/${p}
+-        }
      }
  
      set fpath ${worksrcpath}/${rtpath}
@@ -235,7 +240,7 @@
  
  }
  
-@@ -195,3 +160,4 @@
+@@ -192,3 +161,4 @@
  
  test.run                yes
  test.target             libomp-micro-tests
