@@ -78,13 +78,13 @@ if [ "$PKGOS" = "OSX" ]; then
         # if a recent clang-mp is available
         if command -v clang-mp-6.0 >/dev/null 2>&1; then
             CC=clang-mp-6.0
-            CXX="clang++-mp-6.0 -stdlib=libc++ -std=c++17"
+            CXX="clang++-mp-6.0 -stdlib=libc++ -std=c++20"
         elif command -v clang-mp-5.0 >/dev/null 2>&1; then
             CC=clang-mp-5.0
-            CXX="clang++-mp-5.0 -stdlib=libc++ -std=c++17"
+            CXX="clang++-mp-5.0 -stdlib=libc++ -std=c++20"
         elif command -v /usr/local/opt/llvm@11/bin/clang >/dev/null 2>&1; then
             CC=/usr/local/opt/llvm@11/bin/clang
-            CXX="/usr/local/opt/llvm@11/bin/clang++ -std=c++17"
+            CXX="/usr/local/opt/llvm@11/bin/clang++ -std=c++20"
         fi
         # clang > 7.0 sometimes chokes on building Universal CImg.ofx, probably because of #pragma omp atomic
         #Undefined symbols for architecture i386:
@@ -100,37 +100,37 @@ if [ "$PKGOS" = "OSX" ]; then
             *)
                 # if command -v clang-mp-19 >/dev/null 2>&1; then
                 #     CC=clang-mp-19
-                #     CXX="clang++-mp-19 -stdlib=libc++ -std=c++17"
+                #     CXX="clang++-mp-19 -stdlib=libc++ -std=c++20"
                 # elif command -v clang-mp-18 >/dev/null 2>&1; then
                 #     CC=clang-mp-18
-                #     CXX="clang++-mp-18 -stdlib=libc++ -std=c++17"
+                #     CXX="clang++-mp-18 -stdlib=libc++ -std=c++20"
                 if command -v clang-mp-17 >/dev/null 2>&1; then
                     CC=clang-mp-17
-                    CXX="clang++-mp-17 -stdlib=libc++ -std=c++17"
+                    CXX="clang++-mp-17 -stdlib=libc++ -std=c++20"
                 elif command -v clang-mp-16 >/dev/null 2>&1; then
                     CC=clang-mp-16
-                    CXX="clang++-mp-16 -stdlib=libc++ -std=c++17"
+                    CXX="clang++-mp-16 -stdlib=libc++ -std=c++20"
                 elif command -v clang-mp-15 >/dev/null 2>&1; then
                     CC=clang-mp-15
-                    CXX="clang++-mp-15 -stdlib=libc++ -std=c++17"
+                    CXX="clang++-mp-15 -stdlib=libc++ -std=c++20"
                 elif command -v clang-mp-14 >/dev/null 2>&1; then
                     CC=clang-mp-14
-                    CXX="clang++-mp-14 -stdlib=libc++ -std=c++17"
+                    CXX="clang++-mp-14 -stdlib=libc++ -std=c++20"
                 elif command -v clang-mp-13 >/dev/null 2>&1; then
                     CC=clang-mp-13
-                    CXX="clang++-mp-13 -stdlib=libc++ -std=c++17"
+                    CXX="clang++-mp-13 -stdlib=libc++ -std=c++20"
                 elif command -v clang-mp-12 >/dev/null 2>&1; then
                     CC=clang-mp-12
-                    CXX="clang++-mp-12 -stdlib=libc++ -std=c++17"
+                    CXX="clang++-mp-12 -stdlib=libc++ -std=c++20"
                 elif command -v clang-mp-11 >/dev/null 2>&1; then
                     CC=clang-mp-11
-                    CXX="clang++-mp-11 -stdlib=libc++ -std=c++17"
+                    CXX="clang++-mp-11 -stdlib=libc++ -std=c++20"
                 elif command -v clang-mp-10 >/dev/null 2>&1; then
                     CC=clang-mp-10
-                    CXX="clang++-mp-10 -stdlib=libc++ -std=c++17"
+                    CXX="clang++-mp-10 -stdlib=libc++ -std=c++20"
                 elif command -v clang-mp-9.0 >/dev/null 2>&1; then
                     CC=clang-mp-9.0
-                    CXX="clang++-mp-9.0 -stdlib=libc++ -std=c++17"
+                    CXX="clang++-mp-9.0 -stdlib=libc++ -std=c++20"
                 fi
                 ;;
         esac
@@ -151,7 +151,7 @@ if [ "$PKGOS" = "OSX" ]; then
         #GCC_VERSION=5
         #GCC_VERSION=6
         CC=gcc-mp-${GCC_VERSION} 
-        CXX="g++-mp-${GCC_VERSION} -std=c++17"
+        CXX="g++-mp-${GCC_VERSION} -std=c++20"
         OBJECTIVE_CC=gcc-4.2
         OBJECTIVE_CXX=g++-4.2
     fi
