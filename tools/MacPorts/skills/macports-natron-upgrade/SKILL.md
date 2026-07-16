@@ -1,6 +1,6 @@
 ---
 name: macports-natron-upgrade
-description: Upgrade the local Natron MacPorts portfile overlay against upstream MacPorts. Use when asked to update/upgrade the Natron MacPorts ports, run check.sh, reintegrate upstream Portfile changes, resolve failing Natron patchfiles after a MacPorts sync, or regenerate Portfile.patch files. Enforces that lang/libomp stays pinned.
+description: Upgrade the local Natron MacPorts portfile overlay against upstream MacPorts, and build Natron into a macOS arm64 DMG. Use when asked to update/upgrade the Natron MacPorts ports, run check.sh, reintegrate upstream Portfile changes, resolve failing Natron patchfiles after a MacPorts sync, regenerate Portfile.patch files, or build Natron / produce a DMG via tools/jenkins/launchBuildMain.sh. Enforces that lang/libomp stays pinned.
 version: 1.0.0
 tags: [skill, macports, natron, portfile, upgrade]
 ---
@@ -17,6 +17,7 @@ Use this skill when the user asks to:
 - reintegrate upstream MacPorts changes after `sudo port selfupdate`
 - fix a Natron patchfile that no longer applies after a MacPorts sync
 - regenerate `Portfile.patch` files (unified diffs of `Portfile.orig` → `Portfile`)
+- build Natron and produce a macOS (arm64) `.dmg` via `tools/jenkins/launchBuildMain.sh`
 
 ## Core Concepts
 
@@ -49,13 +50,18 @@ The freeze applies **only to the effective `lang/libomp/Portfile`** — its `Por
 
 ## Compiler pin (clang)
 
-Natron builds with a **pinned** MacPorts clang, not the MacPorts default: `clang_version=16` on modern macOS (`11` on 10.6). Set it explicitly (`sudo port select clang mp-clang-16` and/or `configure.compiler=macports-clang-16`); do not let the moving default take over.
+Natron's app build (`tools/jenkins/compiler-common.sh`) auto-selects a MacPorts `clang-mp-*`. The right version depends on the macOS version — **verify, don't assume the howto**:
 
-- MacPorts derives its default clang in `_resources/port1.0/compilers/clang_compilers.tcl` from `${os.major}` (Darwin major) and the port's `${compiler.cxx_standard}`, newest-first within each eligibility tier. `sudo port selfupdate`, a newer macOS, or a port raising its C++ standard can all bump that default — this is what drives clang upgrades.
-- **Darwin ≥ 25 (macOS 26+):** the fallback list no longer includes `clang-16`/`clang-15` (guarded by `os.major < 25`); the auto-default is `clang-22`. So the clang-16 pin **MUST** be installed and selected explicitly — it is not auto-selected. `clang-16` is still an installable port (`clang-16 @16.0.6`, not obsolete).
-- **Avoid clang-17/18:** with `-fopenmp` they link against `@rpath/libc++.1.dylib` instead of `/usr/lib/libc++.1.dylib` (see `tools/jenkins/compiler-common.sh`).
-- If an `upgrade`/build picks the wrong clang, re-run that port with `configure.compiler=macports-clang-16` rather than accepting the default.
-- `clang_dependency` PortGroup does the opposite: it blacklists all `macports-clang-*`, forcing those ports (e.g. `lang/libomp`, `net/curl`) onto the system Apple clang.
+- **Legacy (howto text):** older macOS pinned `clang_version=16` (`11` on 10.6) for two reasons — clang-17/18 once mis-linked `-fopenmp` against `@rpath/libc++.1.dylib`, and clang-19+ emits `__kmpc_dispatch_deinit`, which was absent from the pinned libomp 11.1.0.
+- **Current (macOS 26 / Darwin 25 — verified):** both reasons are resolved. `clang++-mp-17 -stdlib=libc++ -fopenmp` links against `/usr/lib/libc++.1.dylib` correctly (no `@rpath`), and the missing OpenMP symbol is now backported into libomp 11.1.0 (`files/patch-libomp11-add-kmpc_dispatch_deinit.diff`). So the jenkins default (**clang-mp-17**, the top uncommented entry in `compiler-common.sh`) builds correctly, and clang-16 (no longer in the Darwin≥25 fallback, and possibly not installed) need not be forced.
+- **Verify on the running OS before trusting a pin:**
+  ```bash
+  printf 'int main(){}\n' > /tmp/t.cpp
+  clang++-mp-17 -stdlib=libc++ -fopenmp /tmp/t.cpp -o /tmp/t && otool -L /tmp/t | grep -E 'libc\+\+|libomp'
+  ```
+  Expect `/usr/lib/libc++.1.dylib` and `/opt/local/lib/libomp/libomp.dylib`. If a future clang regresses the libc++ path, pin a known-good `clang-mp-N` by editing the `compiler-common.sh` selection chain.
+- MacPorts' *port-build* default clang is separate: derived in `clang_compilers.tcl` from `${os.major}` + `${compiler.cxx_standard}` (Darwin≥25 → clang-22). That builds the dependency ports; the Natron app build uses `compiler-common.sh`'s choice.
+- `clang_dependency` PortGroup blacklists all `macports-clang-*`, forcing those ports (e.g. `lang/libomp`, `net/curl`) onto the system Apple clang.
 
 ## Privilege note
 `sudo port ...` cannot be run by the agent. For every `sudo` step you **MUST** print the exact command, ask the user to run it, and wait for them to confirm/paste output before continuing.
@@ -150,6 +156,36 @@ The failure is almost always a **context mismatch**: the patch was written for a
    cp <extracted-source-file> /tmp/t/<relpath> && ( cd /tmp/t && patch -t -N -p0 < <patchfile> )
    ```
    Expect exit 0 and no `.rej`.
+
+## Building Natron (produce a DMG)
+
+The full macOS build (Natron + OpenFX plugins, bundled into a `.dmg`) is driven by `tools/jenkins/launchBuildMain.sh`, which runs 6 steps: (1) checkout sources, (2) build plugins, (3) build Natron, (4) build installer/DMG, (5) unit tests, (6) archive/cleanup.
+
+**Prerequisites** (installed into `/opt/local` via MacPorts — sudo; see the howto's install list):
+- Full SDK: qt5, python310, **py310-pyside2** (provides the shiboken2 generator), openimageio, ffmpeg, cairo, librsvg, boost, openexr, seexpr/seexpr211, ImageMagick, etc.
+- **OSMesa** at `/opt/osmesa` (or `$SDK_HOME/osmesa`), built separately via `osmesa-install.sh`.
+- Symlinks the build checks (else it hard-exits): `…/site-packages/shiboken2_generator/shiboken2-<PYVER>` **must resolve to a real file**, `/opt/local/bin/shiboken2 → shiboken2-<PYVER>`, and `${SDK_HOME}/Library/lib → Frameworks`.
+- The `/opt/MacPorts-Natron` overlay declared in `sources.conf` (this skill's upgrade workflow).
+
+**Launch** (RB-2.6, release; runs **without sudo** — builds into `$WORKSPACE`; long-running, so background it):
+```bash
+cd tools/jenkins
+nohup env NOUPDATE=1 WORKSPACE=$HOME/Development/workspace \
+  DISABLE_BREAKPAD=1 NATRON_LICENSE=GPL \
+  GIT_URL=https://github.com/NatronGitHub/Natron.git GIT_BRANCH=RB-2.6 \
+  UNIT_TESTS=false BUILD_NAME=natron_github_RB2 BUILD_NUMBER=1 \
+  COMPILE_TYPE=release MKJOBS=8 \
+  ./launchBuildMain.sh > /tmp/natron-build.log 2>&1 &
+```
+`set -e` means it stops at the first error; the log tail shows the failing step. Monitor with `tail -f /tmp/natron-build.log`.
+
+- **arch:** on Apple Silicon it targets arm64 natively (no flag needed; the howto's `BITS=Universal` is for older/Intel setups).
+- **compiler:** auto-selected by `compiler-common.sh` (clang-mp-17 on macOS 26 — see Compiler pin).
+- **output DMG:** under `$WORKSPACE/builds_archive/$BUILD_NAME/$BUILD_NUMBER/` (`build-OSX-installer.sh` writes `<INSTALLER_BASENAME>.dmg`).
+- **partial runs:** `BUILD_FROM`/`BUILD_TO` restrict which of the 6 steps run; `DEBUG_SCRIPTS=1` keeps prior binaries to resume.
+- **release build:** set `RELEASE_TAG=x.y.z NATRON_DEV_STATUS=STABLE NATRON_BUILD_NUMBER=1` instead of a branch CI build.
+
+**Common prerequisite failure:** `Error: broken MacPort install … shiboken2` means `py310-pyside2` isn't installed (or its generator symlink dangles) → `sudo port -v -N install py310-pyside2`, then ensure the two shiboken symlinks above resolve to real files.
 
 ## Quick reference
 | Action | Command |
