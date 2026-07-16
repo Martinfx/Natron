@@ -37,16 +37,16 @@
 
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
-#include <QtCore/QtGlobal> // for Q_OS_*
-#include <QtCore/QMutex>
-#include <QtCore/QWaitCondition>
-#include <QtCore/QFileSystemWatcher>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDateTime>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QDebug>
-#include <QtCore/QUrl>
-#include <QtCore/QMimeData>
+#include <QtGlobal> // for Q_OS_*
+#include <QMutex>
+#include <QWaitCondition>
+#include <QFileSystemWatcher>
+#include <QFileInfo>
+#include <QDateTime>
+#include <QCoreApplication>
+#include <QDebug>
+#include <QUrl>
+#include <QMimeData>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
@@ -769,11 +769,7 @@ Qt::ItemFlags
 FileSystemModel::flags(const QModelIndex &index) const
 {
     if ( !index.isValid() ) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         return Qt::ItemFlags();
-#else
-        return 0;
-#endif
     }
 
     // Our model is read only.
@@ -846,7 +842,7 @@ FileSystemModel::data(const QModelIndex &index,
         data = item->fileExtension();
         break;
     case DateModified:
-        data = item->getLastModified().toString(Qt::LocalDate);
+        data = QLocale().toString(item->getLastModified(), QLocale::ShortFormat);
         break;
     default:
         break;

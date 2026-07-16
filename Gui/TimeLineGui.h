@@ -33,19 +33,16 @@
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
 #include "Global/GLIncludes.h" //!<must be included before QGlWidget because of gl.h and glew.h
-#include <QtCore/QList>
-#include <QtCore/QPointF>
-#include <QtCore/QSize>
+#include <QList>
+#include <QPointF>
+#include <QSize>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
 #include <QOpenGLWidget>
-#else
-#include "Gui/QGLWidgetCompat.h"
-#endif
 
 #include "Global/GlobalDefines.h"
+#include "Global/QtCompat.h"
 
 #include "Gui/GuiFwd.h"
 
@@ -170,7 +167,7 @@ private:
     virtual void mouseMoveEvent(QMouseEvent* e) OVERRIDE FINAL;
     virtual void mouseReleaseEvent(QMouseEvent* e) OVERRIDE FINAL;
     virtual void wheelEvent(QWheelEvent* e) OVERRIDE FINAL;
-    virtual void enterEvent(QEvent* e) OVERRIDE FINAL;
+    virtual void enterEvent(QtCompat::QEnterEvent* e) OVERRIDE FINAL;
     virtual void leaveEvent(QEvent* e) OVERRIDE FINAL;
     virtual QSize sizeHint() const OVERRIDE FINAL;
 

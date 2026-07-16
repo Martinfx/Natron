@@ -21,46 +21,10 @@
 
 #include "Global/Macros.h"
 
-#include <QtCore/QtGlobal> // for Q_OS_*
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include <QtCore/QDir>
-#include <QtCore/QString>
-
-NATRON_NAMESPACE_ENTER
-
-namespace QtCompat {
-inline bool
-removeRecursively(const QString & dirName)
-{
-    bool result = false;
-    QDir dir(dirName);
-
-    if ( dir.exists(dirName) ) {
-        Q_FOREACH( QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst) ) {
-            if ( info.isDir() ) {
-                result = removeRecursively( info.absoluteFilePath() );
-            } else {
-                result = QFile::remove( info.absoluteFilePath() );
-            }
-
-            if (!result) {
-                return result;
-            }
-        }
-        result = dir.rmdir(dirName);
-    }
-
-    return result;
-}
-} // namespace QtCompat
-
-NATRON_NAMESPACE_EXIT
-
-#endif
-
-#include <QtCore/QString>
-#include <QtCore/QUrl>
-#include <QtCore/QFileInfo>
+#include <QtGlobal> // for Q_OS_*
+#include <QString>
+#include <QUrl>
+#include <QFileInfo>
 
 NATRON_NAMESPACE_ENTER
 
@@ -82,16 +46,15 @@ removeFileExtension(QString & filename)
     return extension;
 }
 
-// in Qt 4.8 QUrl is broken on mac, it returns /.file/id= for local files
-// See https://bugreports.qt.io/browse/QTBUG-40449
-#if defined(Q_OS_DARWIN) && QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-//Implementation is in QUrlFix.mm
-QUrl toLocalFileUrlFixed(const QUrl& url);
-#else // #if defined(Q_OS_DARWIN) && QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-inline QUrl
-toLocalFileUrlFixed(const QUrl& url) { return url; }
+// Define compatibility typedefs so code builds with Qt5 & Qt6
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+typedef QEnterEvent QEnterEvent;
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+typedef QEvent QEnterEvent;
+#else
+#error "Unsupported version of QT"
+#endif
 
-#endif // #if defined(Q_OS_DARWIN) && QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 } // namespace QtCompat
 
 NATRON_NAMESPACE_EXIT

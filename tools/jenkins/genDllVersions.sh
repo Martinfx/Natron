@@ -89,32 +89,7 @@ function catDll() {
 INIT_VAR=1
 DLL_VAR_PREFIX="NATRON"
 BIN_PATH="$SDK_HOME_BIN"
-if [ "$QT_VERSION_MAJOR" = "4" ]; then
-    # all Qt libraries are necessary for PySide
-    catDll Qt3Support4
-    catDll QtCLucene4
-    catDll QtCore4
-    catDll QtDBus4
-    catDll QtDeclarative4
-    catDll QtDesigner4
-    catDll QtDesignerComponents4
-    catDll QtGui4
-    catDll QtHelp4
-    catDll QtMultimedia4
-    catDll QtNetwork4
-    catDll QtOpenGL4
-    catDll QtScript4
-    catDll QtScriptTools4
-    catDll QtSql4
-    catDll QtSvg4
-    catDll QtTest4
-    catDll QtXml4
-    catDll QtXmlPatterns4
-
-    catDll phonon4
-    catDll libmng-
-    catDll libpcre-
-elif [ "$QT_VERSION_MAJOR" = "5" ]; then
+if [ "$QT_VERSION_MAJOR" = "5" ]; then
     catDll Qt5Concurrent
     catDll Qt5Core
     catDll Qt5DBus
@@ -141,7 +116,7 @@ elif [ "$QT_VERSION_MAJOR" = "5" ]; then
     catDll libpcre2-16-
     catDll libmd4c
 else
-    echo "Unsupported QT_MAJOR_VERSION" ${QT_VERSION_MAJOR}
+    echo "Unsupported QT_VERSION_MAJOR" ${QT_VERSION_MAJOR}
     exit 1
 fi
 
@@ -150,9 +125,7 @@ catDll fbclient
 catDll libass-
 catDll libbluray-
 catDll libboost_filesystem-mt
-catDll libboost_regex-mt
 catDll libboost_serialization-mt
-catDll libboost_system-mt
 catDll libboost_thread-mt
 catDll libbz2-
 catDll libcaca-
@@ -194,14 +167,16 @@ catDll libmodplug-
 catDll libmp3lame-
 catDll libnettle-
 catDll libnghttp2-
+catDll libnghttp3-
 catDll libogg-
 catDll libopenal-
 catDll libOpenColorIO
 catDll libOpenEXR-
 catDll libOpenEXRCore
-catDll libOpenImageIO
-catDll libOpenImageIO_Util
+catDll libOpenImageIO-
+catDll libOpenImageIO_Util-
 catDll libopenjp2-
+catDll libopenjph-
 catDll libopus-
 catDll libp11-kit-
 catDll libpango-
@@ -254,7 +229,9 @@ catDll libdatrie-
 catDll libsnappy
 #catDll libpugixml
 catDll libheif
-catDll rav1e
+catDll libkvazaar-
+catDll libcryptopp
+catDll librav1e
 catDll libde265-
 catDll libx265
 catDll libdav1d
@@ -328,6 +305,8 @@ catDll libfftw3-
 catDll libfftw3_threads-
 catDll libcurl-
 catDll libnghttp2-
+catDll libngtcp2-
+catDll libngtcp2_crypto_ossl
 #catDll libbrotlidec
 #catDll libbrotlicommon
 

@@ -36,6 +36,8 @@ CLANG_DIAG_OFF(uninitialized)
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
+#include "Global/QtCompat.h"
+
 #include "Engine/PyNode.h"
 #include "Engine/ScriptObject.h"
 #include "Engine/Knob.h"
@@ -74,7 +76,7 @@ private:
     virtual void initializeKnobs() OVERRIDE FINAL {}
 
     virtual bool onKnobValueChanged(KnobI* k,
-                                    NATRON_ENUM::ValueChangedReasonEnum reason,
+                                    Natron::ValueChangedReasonEnum reason,
                                     double time,
                                     ViewSpec view,
                                     bool originatedFromMainThread) OVERRIDE FINAL;
@@ -91,7 +93,7 @@ class PyModalDialog
 public:
 
     PyModalDialog( Gui* gui,
-                   NATRON_ENUM::StandardButtons defaultButtons = NATRON_ENUM::StandardButtons(NATRON_ENUM::eStandardButtonOk | NATRON_ENUM::eStandardButtonCancel) );
+                   Natron::StandardButtons defaultButtons = Natron::StandardButtons(Natron::StandardButtonEnum::eStandardButtonOk | Natron::StandardButtonEnum::eStandardButtonCancel) );
 
     virtual ~PyModalDialog();
 
@@ -103,11 +105,9 @@ public:
 
     void addWidget(QWidget* widget);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     virtual QSize minimumSizeHint() const OVERRIDE FINAL;
 
     virtual QSize sizeHint() const OVERRIDE FINAL;
-#endif
 
     DialogParamHolder* getKnobsHolder() const;
 
@@ -159,7 +159,7 @@ protected:
 
     void onUserDataChanged();
     virtual void mousePressEvent(QMouseEvent* e) OVERRIDE;
-    virtual void enterEvent(QEvent* e) OVERRIDE;
+    virtual void enterEvent(QtCompat::QEnterEvent* e) OVERRIDE;
     virtual void leaveEvent(QEvent* e) OVERRIDE;
     virtual void keyPressEvent(QKeyEvent* e) OVERRIDE;
 

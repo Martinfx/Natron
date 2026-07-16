@@ -33,7 +33,8 @@ checksums \
         sha256  ffd6916cd66c8101e4e6b589799f256c897748d2fd2486aa34c3705146dbc701 \
         size    39002
 
-patchfiles          libraw_x3f.diff
+patchfiles          libraw_x3f.diff \
+                    patch-libraw-auto_ptr-to-unique_ptr.diff
 
 depends_build       port:pkgconfig
 

@@ -31,7 +31,7 @@
 
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
-#include <QtCore/QDebug>
+#include <QDebug>
 #include <QSplitter>
 #include <QVBoxLayout>
 CLANG_DIAG_ON(deprecated)
@@ -103,7 +103,7 @@ ProjectGuiSerialization::initialize(const ProjectGui* projectGui)
                         viewerData.colorSpace = tab->getColorSpace();
                         viewerData.channels = tab->getChannelsString();
                         viewerData.renderScaleActivated = tab->getRenderScaleActivated();
-                        viewerData.mipMapLevel = tab->getMipMapLevel();
+                        viewerData.mipmapLevel = tab->getMipmapLevel();
                         viewerData.zoomOrPanSinceLastFit = tab->getZoomOrPannedSinceLastFit();
                         viewerData.wipeCompositingOp = (int)tab->getCompositingOperator();
                         viewerData.leftToolbarVisible = tab->isLeftToolbarVisible();

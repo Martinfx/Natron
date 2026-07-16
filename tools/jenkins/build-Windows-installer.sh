@@ -131,14 +131,27 @@ $GSED -e "s/_VERSION_/${NATRON_VERSION_FULL}/;s#_RBVERSION_#${NATRON_GIT_BRANCH}
 cp "$INC_PATH/config/"*.png "$INSTALLER_PATH/config/"
 
 # make sure we have mt and qtifw
-if [ ! -f "$SDK_HOME/bin/mt.exe" ] || [ ! -f "$SDK_HOME/bin/binarycreator.exe" ]; then
-    if [ ! -d "$SRC_PATH/natron-windows-installer" ]; then
-        ( cd "$SRC_PATH";
-          $CURL "$THIRD_PARTY_BIN_URL/natron-windows-installer.zip" --output "$SRC_PATH/natron-windows-installer.zip"
-          unzip natron-windows-installer.zip
-        )
+
+MT_BIN=mt.exe
+if ! which ${MT_BIN}; then
+    # Add Windows SDK to path so that mt.exe is available.
+    WIN_SDK_MAJOR_VERSION=10
+    WIN_SDK_BASE_PATH="/c/Program Files (x86)/Windows Kits/${WIN_SDK_MAJOR_VERSION}/bin"
+    MT_BIN=$(find "${WIN_SDK_BASE_PATH}" -name mt.exe | grep x64 | sort -n | tail -1)
+
+    if [[ -z "${MT_BIN}" ]]; then
+        echo "Failed to find mt.exe"
+        exit 1
     fi
-    cp "$SRC_PATH/natron-windows-installer/mingw$BITS/bin/"{archivegen.exe,binarycreator.exe,installerbase.exe,installerbase.manifest,repogen.exe,mt.exe} "$SDK_HOME/bin/"
+fi
+
+if ! which binarycreator.exe && [ ! -f "/Setup.exe" ]; then
+    pacman -S mingw-w64-x86_64-qt-installer-framework
+
+    if ! which binarycreator.exe; then
+        echo "Failed to find binarycreator.exe"
+        exit 1
+    fi
 fi
 
 function installPlugin() {
@@ -209,7 +222,7 @@ function installPlugin() {
         done
         echo "</assembly>" >> "$PLUGIN_MANIFEST"
         for location in "$PKG_PATH/data" "${TMP_PORTABLE_DIR}"; do
-            (cd "$location/Plugins/OFX/Natron/${OFX_BINARY}.ofx.bundle/Contents/Win${BITS}"; mt -nologo -manifest "$PLUGIN_MANIFEST" -outputresource:"${OFX_BINARY}.ofx;2")
+            (cd "$location/Plugins/OFX/Natron/${OFX_BINARY}.ofx.bundle/Contents/Win${BITS}"; "${MT_BIN}" -nologo -manifest "$PLUGIN_MANIFEST" -outputresource:"${OFX_BINARY}.ofx;2")
         done
 
     fi
@@ -372,13 +385,7 @@ for location in "${COPY_LOCATIONS[@]}"; do
     done
 
     #Copy Qt dlls (required for all PySide modules to work correctly)
-    if [ "${QT_VERSION_MAJOR}" = 4 ]; then
-        cp "$SDK_HOME/bin"/Qt*4.dll "$location/bin/"
-        # Ignore debug dlls of Qt
-        rm "$location/bin"/*d4.dll || true
-    else
-        cp "$SDK_HOME/bin"/Qt${QT_VERSION_MAJOR}*.dll "$location/bin/"
-    fi
+    cp "$SDK_HOME/bin"/Qt${QT_VERSION_MAJOR}*.dll "$location/bin/"
 
     rm "$location/bin/sqldrivers"/{*mysql*,*psql*} || true
 
@@ -397,13 +404,8 @@ mkdir -p "${TMP_PORTABLE_DIR}/Plugins"
 cp -a "$SDK_HOME/lib/python${PYVER}" "${TMP_PORTABLE_DIR}/lib/"
 
 
-if [[ ${QT_VERSION_MAJOR} -ge 5 ]]; then
-    PYSIDE_PLUGIN_PATH="${TMP_PORTABLE_DIR}/Plugins/PySide2"
-    mv "${TMP_PORTABLE_DIR}/lib/python${PYVER}/site-packages/PySide2" "${TMP_PORTABLE_DIR}/lib/python${PYVER}/site-packages/shiboken2" "${TMP_PORTABLE_DIR}/Plugins"
-else
-    PYSIDE_PLUGIN_PATH="${TMP_PORTABLE_DIR}/Plugins/PySide"
-    mv "${TMP_PORTABLE_DIR}/lib/python${PYVER}/site-packages/PySide" "${TMP_PORTABLE_DIR}/Plugins"
-fi
+PYSIDE_PLUGIN_PATH="${TMP_PORTABLE_DIR}/Plugins/PySide2"
+mv "${TMP_PORTABLE_DIR}/lib/python${PYVER}/site-packages/PySide2" "${TMP_PORTABLE_DIR}/lib/python${PYVER}/site-packages/shiboken2" "${TMP_PORTABLE_DIR}/Plugins"
 
 rm -rf "${TMP_PORTABLE_DIR}/lib/python${PYVER}"/{test,config,config-"${PYVER}"m}
 
@@ -431,14 +433,7 @@ for dir in "${PYSIDE_PLUGIN_PATH}" "${TMP_PORTABLE_DIR}/lib/python${PYVER:-}"; d
 done
 fi
 
-if [[ ${QT_VERSION_MAJOR} -ge 5 ]]; then
-    USE_QT5=1
-fi
-
 # python zip
-if [ "${USE_QT5:-}" != 1 ]; then
-    rm -rf  "$PYDIR"/site-packages/shiboken2*  "$PYDIR"/site-packages/PySide2 || true
-fi
 
 export PY_BIN="$SDK_HOME/bin/python.exe"
 export PYDIR="$PYDIR"
@@ -457,14 +452,8 @@ if [ -x "${NATRON_PYTHON}" ]; then
     "${NATRON_PYTHON}" get-pip.py
     rm get-pip.py
     # Install qtpy
-    if [ "${USE_QT5:-}" != 1 ]; then
-        # Qt4 support was dropped after QtPy 1.11.2
-        "${NATRON_PYTHON}" -m pip install qtpy==1.11.2
-        # bug fix for Qt4
-        $GSED -i "s/^except ImportError:/except (ImportError, PythonQtError):/" "${TMP_PORTABLE_DIR}/lib/python${PYVER:-}/site-packages/qtpy/__init__.py"
-    else
-        "${NATRON_PYTHON}" -m pip install qtpy
-    fi
+    "${NATRON_PYTHON}" -m pip install qtpy
+
     # Useful Python packages
     "${NATRON_PYTHON}" -m pip install future six #psutil
     # Run extra user provided pip install scripts

@@ -45,7 +45,7 @@ GCC_DIAG_UNUSED_PRIVATE_FIELD_OFF
 // /opt/local/include/QtGui/qmime.h:119:10: warning: private field 'type' is not used [-Wunused-private-field]
 #include <QKeyEvent>
 GCC_DIAG_UNUSED_PRIVATE_FIELD_ON
-#include <QtCore/QDebug>
+#include <QDebug>
 #include <QFontComboBox>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
@@ -96,11 +96,7 @@ AnimatingTextEdit::AnimatingTextEdit(const KnobGuiPtr& knob,
     , dirty(false)
     , _dnd( KnobWidgetDnD::create(knob, dimension, this) )
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
     setTabStopDistance(20);
-#else
-    setTabStopWidth(20); // a tab width of 20 is more reasonable than 80 for programming languages (e.g. Shadertoy)
-#endif
 }
 
 AnimatingTextEdit::~AnimatingTextEdit()
@@ -151,7 +147,7 @@ AnimatingTextEdit::setDirty(bool b)
 }
 
 void
-AnimatingTextEdit::enterEvent(QEvent* e)
+AnimatingTextEdit::enterEvent(QtCompat::QEnterEvent* e)
 {
     _dnd->mouseEnter(e);
     QTextEdit::enterEvent(e);
@@ -274,7 +270,7 @@ KnobLineEdit::~KnobLineEdit()
 }
 
 void
-KnobLineEdit::enterEvent(QEvent* e)
+KnobLineEdit::enterEvent(QtCompat::QEnterEvent* e)
 {
     _dnd->mouseEnter(e);
     LineEdit::enterEvent(e);

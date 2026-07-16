@@ -30,10 +30,10 @@
 #include <limits>
 #include <stdexcept>
 
-#include <QtCore/QThread>
-#include <QtCore/QObject>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QDebug>
+#include <QThread>
+#include <QObject>
+#include <QCoreApplication>
+#include <QDebug>
 
 #include "Engine/Bezier.h"
 #include "Engine/Knob.h"
@@ -46,9 +46,7 @@
 #include "Gui/CurveWidgetPrivate.h"
 #include "Gui/KnobGui.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
 #include <QOpenGLContext>
-#endif
 
 NATRON_NAMESPACE_ENTER
 

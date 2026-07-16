@@ -27,8 +27,8 @@
 
 #include "GenericSchedulerThreadWatcher.h"
 
-#include <QtCore/QMetaType>
-#include <QtCore/QWaitCondition>
+#include <QMetaType>
+#include <QWaitCondition>
 
 #include "Engine/GenericSchedulerThread.h"
 #include "Engine/OutputSchedulerThread.h"
@@ -180,7 +180,7 @@ GenericWatcher::scheduleBlockingTask(int taskID,
     }
 
     {
-        QMutexLocker(&_imp->tasksMutex);
+        QMutexLocker k(&_imp->tasksMutex);
         GenericWatcherPrivate::Task t;
         t.id = taskID;
         t.args = args;

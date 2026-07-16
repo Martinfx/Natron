@@ -33,12 +33,12 @@
 
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
-#include <QtCore/QCoreApplication>
-#include <QtCore/QDateTime>
-#include <QtCore/QString>
+#include <QCoreApplication>
+#include <QDateTime>
+#include <QString>
 #include <QFuture>
 #include <QFutureWatcher>
-#include <QtCore/QMutex>
+#include <QMutex>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
@@ -68,12 +68,7 @@ public:
     QDateTime projectCreationTime; //< the project creation time
     std::list<Format> builtinFormats;
     std::list<Format> additionalFormats; //< added by the user
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     mutable QRecursiveMutex formatMutex;
-#else
-    mutable QMutex formatMutex; //< protects builtinFormats & additionalFormats
-#endif
-
 
     ///Project parameters (settings)
     KnobPathPtr envVars;

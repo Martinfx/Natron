@@ -33,8 +33,8 @@ CLANG_DIAG_OFF(uninitialized)
 #include <QScrollBar>
 #include <QTextBlock>
 #include <QPainter>
-#include <QtCore/QRegExp>
-#include <QtCore/QMimeData>
+#include <QRegExp>
+#include <QMimeData>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
@@ -340,11 +340,7 @@ InputScriptTextEdit::getLineNumberAreaWidth()
         ++digits;
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
     return 3 + fontMetrics().horizontalAdvance( QLatin1Char('9') ) * digits;
-#else
-    return 3 + fontMetrics().width( QLatin1Char('9') ) * digits;
-#endif
 }
 
 void
@@ -501,7 +497,7 @@ InputScriptTextEdit::dropEvent(QDropEvent* e)
 }
 
 void
-InputScriptTextEdit::enterEvent(QEvent* /*e*/)
+InputScriptTextEdit::enterEvent(QtCompat::QEnterEvent* /*e*/)
 {
     if ( acceptDrops() && (cursor().shape() != Qt::OpenHandCursor) ) {
         setCursor(Qt::OpenHandCursor);

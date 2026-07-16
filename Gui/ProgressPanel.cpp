@@ -30,18 +30,18 @@
 
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
-#include <QtCore/QMutex>
+#include <QMutex>
 #include <QProgressBar>
 #include <QVBoxLayout>
 #include <QKeyEvent>
 #include <QItemSelectionModel>
 #include <QTextEdit>
 #include <QApplication>
-#include <QtCore/QThread>
+#include <QThread>
 #include <QHeaderView>
 #include <QCheckBox>
 #include <QCursor>
-#include <QtCore/QTimer>
+#include <QTimer>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
@@ -299,7 +299,7 @@ ProgressPanel::keyReleaseEvent(QKeyEvent* e)
 }
 
 void
-ProgressPanel::enterEvent(QEvent* e)
+ProgressPanel::enterEvent(QtCompat::QEnterEvent* e)
 {
     enterEventBase();
     QWidget::enterEvent(e);

@@ -28,13 +28,13 @@
 
 #include <cassert>
 #include <stdexcept>
-#include <QtCore/QDebug>
+#include <QDebug>
 
 #include <QApplication>
 GCC_DIAG_UNUSED_PRIVATE_FIELD_OFF
 // /opt/local/include/QtGui/qmime.h:119:10: warning: private field 'type' is not used [-Wunused-private-field]
-#include <QtGui/QKeyEvent>
-#include <QtCore/QTimer>
+#include <QKeyEvent>
+#include <QTimer>
 GCC_DIAG_UNUSED_PRIVATE_FIELD_ON
 
 #include "Engine/Node.h"
@@ -76,6 +76,8 @@ ViewerTab::onColorSpaceComboBoxChanged(int v)
         colorspace = eViewerColorSpaceSRGB;
     } else if (v == 2) {
         colorspace = eViewerColorSpaceRec709;
+    } else if (v == 3) {
+        colorspace = eViewerColorSpaceBT1886;
     } else {
         assert(false);
         throw std::logic_error("ViewerTab::onColorSpaceComboBoxChanged(): unknown colorspace");
@@ -587,7 +589,7 @@ ViewerTab::previousLayer()
 }
 
 void
-ViewerTab::enterEvent(QEvent* e)
+ViewerTab::enterEvent(QtCompat::QEnterEvent* e)
 {
     enterEventBase();
     QWidget::enterEvent(e);
@@ -617,11 +619,11 @@ ViewerTab::keyPressEvent(QKeyEvent* e)
     bool accept = true;
     Qt::KeyboardModifiers modifiers = e->modifiers();
     Qt::Key key = (Qt::Key)Gui::handleNativeKeys( e->key(), e->nativeScanCode(), e->nativeVirtualKey() );
-    double scale = 1. / ( 1 << _imp->viewer->getCurrentRenderScale() );
 
-    if ( e->isAutoRepeat() && notifyOverlaysKeyRepeat(RenderScale(scale), e) ) {
+    const unsigned int mipmapLevel = _imp->viewer->getCurrentMipmapLevel();
+    if ( e->isAutoRepeat() && notifyOverlaysKeyRepeat(RenderScale::fromMipmapLevel(mipmapLevel), e) ) {
         update();
-    } else if ( notifyOverlaysKeyDown(RenderScale(scale), e) ) {
+    } else if ( notifyOverlaysKeyDown(RenderScale::fromMipmapLevel(mipmapLevel), e) ) {
         update();
     } else if ( isKeybind(kShortcutGroupViewer, kShortcutIDActionLuminance, modifiers, key) ) {
         int currentIndex = _imp->viewerChannels->activeIndex();
@@ -856,18 +858,10 @@ ViewerTab::keyPressEvent(QKeyEvent* e)
     } else if ( isKeybind(kShortcutGroupViewer, kShortcutIDActionHideTop, modifiers, key) ) {
         toggleTopToolbarVisibility();
     } else if ( isKeybind(kShortcutGroupGlobal, kShortcutIDActionZoomIn, Qt::NoModifier, key) ) { // zoom in/out doesn't care about modifiers
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         QWheelEvent e(mapFromGlobal( QCursor::pos() ), QCursor::pos(), QPoint(), QPoint(0, 120), Qt::NoButton, Qt::NoModifier, Qt::NoScrollPhase, false);
-#else
-        QWheelEvent e(mapFromGlobal( QCursor::pos() ), 120, Qt::NoButton, Qt::NoModifier); // one wheel click = +-120 delta
-#endif
         wheelEvent(&e);
     } else if ( isKeybind(kShortcutGroupGlobal, kShortcutIDActionZoomOut, Qt::NoModifier, key) ) { // zoom in/out doesn't care about modifiers
-#if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
         QWheelEvent e(mapFromGlobal( QCursor::pos() ), QCursor::pos(), QPoint(), QPoint(0, -120), Qt::NoButton, Qt::NoModifier, Qt::NoScrollPhase, false);
-#else
-        QWheelEvent e(mapFromGlobal( QCursor::pos() ), -120, Qt::NoButton, Qt::NoModifier); // one wheel click = +-120 delta
-#endif
         wheelEvent(&e);
     } else if (key == Qt::Key_Escape) {
         _imp->viewer->s_selectionCleared();
@@ -901,8 +895,8 @@ ViewerTab::keyReleaseEvent(QKeyEvent* e)
     if ( !getGui() ) {
         return QWidget::keyPressEvent(e);
     }
-    double scale = 1. / ( 1 << _imp->viewer->getCurrentRenderScale() );
-    if ( notifyOverlaysKeyUp(RenderScale(scale), e) ) {
+    const unsigned int mipmapLevel = _imp->viewer->getCurrentMipmapLevel();
+    if ( notifyOverlaysKeyUp(RenderScale::fromMipmapLevel(mipmapLevel), e) ) {
         _imp->viewer->redraw();
     } else {
         handleUnCaughtKeyUpEvent(e);

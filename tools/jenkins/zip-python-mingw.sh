@@ -23,7 +23,6 @@ concurrent
 ctypes
 curses
 dbm
-distutils
 email
 encodings
 html
@@ -37,11 +36,13 @@ multiprocessing
 pydoc_data
 re
 sqlite3
+tomllib
 unittest
 urllib
 wsgiref
 xml
 xmlrpc
+zipfile
 zoneinfo
 "
 

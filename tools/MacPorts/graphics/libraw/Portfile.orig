@@ -3,12 +3,12 @@
 PortSystem          1.0
 
 name                libraw
-version             0.21.1
+version             0.21.4
 revision            0
 
-checksums           rmd160  be36d8709eb2e8578f07b63ea8632eb6ed1d7775 \
-                    sha256  630a6bcf5e65d1b1b40cdb8608bdb922316759bfb981c65091fec8682d1543cd \
-                    size    1638461
+checksums           rmd160  17e00654b27c95f537e320a6ba2579fab5a17fa4 \
+                    sha256  6be43f19397e43214ff56aab056bf3ff4925ca14012ce5a1538a172406a09e63 \
+                    size    1383350
 
 description         Library for RAW image manipulation
 long_description    A library for reading RAW files obtained from digital photo \
@@ -29,6 +29,7 @@ depends_lib         port:jasper \
                     port:lcms2
 
 use_autoreconf      yes
+autoreconf.args     -fvi
 
 # libraw_datastream.h:125:8: error: no template named 'unique_ptr' in namespace 'std'
 compiler.cxx_standard 2011

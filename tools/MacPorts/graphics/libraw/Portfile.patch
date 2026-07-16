@@ -1,18 +1,18 @@
---- Portfile.orig	2023-01-28 18:14:47.000000000 -0800
-+++ Portfile	2023-01-28 18:14:55.000000000 -0800
-@@ -3,47 +3,67 @@
+--- Portfile.orig	2026-06-18 13:37:56
++++ Portfile	2026-07-16 09:01:49
+@@ -3,50 +3,70 @@
  PortSystem          1.0
  
  name                libraw
--version             0.21.1
+-version             0.21.4
 -revision            0
--
--checksums           rmd160  be36d8709eb2e8578f07b63ea8632eb6ed1d7775 \
--                    sha256  630a6bcf5e65d1b1b40cdb8608bdb922316759bfb981c65091fec8682d1543cd \
--                    size    1638461
 +version             0.18.13
 +set demosaicversion 0.18.8
  
+-checksums           rmd160  17e00654b27c95f537e320a6ba2579fab5a17fa4 \
+-                    sha256  6be43f19397e43214ff56aab056bf3ff4925ca14012ce5a1538a172406a09e63 \
+-                    size    1383350
+-
  description         Library for RAW image manipulation
  long_description    A library for reading RAW files obtained from digital photo \
                      cameras (CRW/CR2, NEF, RAF, DNG, and others).
@@ -41,7 +41,8 @@
 +        sha256  ffd6916cd66c8101e4e6b589799f256c897748d2fd2486aa34c3705146dbc701 \
 +        size    39002
 +
-+patchfiles          libraw_x3f.diff
++patchfiles          libraw_x3f.diff \
++                    patch-libraw-auto_ptr-to-unique_ptr.diff
 +
  depends_build       port:pkgconfig
  
@@ -50,6 +51,7 @@
                      port:lcms2
  
 -use_autoreconf      yes
+-autoreconf.args     -fvi
 -
 -# libraw_datastream.h:125:8: error: no template named 'unique_ptr' in namespace 'std'
 -compiler.cxx_standard 2011
@@ -70,8 +72,8 @@
 +        reinplace -E {s|-lstdc|-lc|g} ${destroot}${prefix}/lib/pkgconfig/libraw.pc
 +        reinplace -E {s|-lstdc|-lc|g} ${destroot}${prefix}/lib/pkgconfig/libraw_r.pc
 +    }
-+}
-+
+ }
+ 
 +variant gpl2 description {Enable GPL demosaic pack, license will be GPL-2+} {
 +    distfiles-append \
 +        LibRaw-demosaic-pack-GPL2-${demosaicversion}${extract.suffix} \
@@ -84,6 +86,8 @@
 +        LibRaw-demosaic-pack-GPL3-${demosaicversion}${extract.suffix}
 +
 +    license                 GPL-3+
- }
- 
++}
++
  livecheck.type      regex
+ livecheck.url       ${homepage}/download/
+ livecheck.regex     "LibRaw-(\\d+(?:\\.\\d+)*)${extract.suffix}"

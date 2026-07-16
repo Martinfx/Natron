@@ -34,11 +34,7 @@
 #include "Global/GLIncludes.h" //!<must be included before QGlWidget because of gl.h and glew.h
 #include <QApplication> // qApp
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
 #include <QOpenGLShaderProgram>
-#else
-#include "Gui/QGLExtrasCompat.h"
-#endif
 
 #include "Engine/Lut.h" // Color
 #include "Engine/Settings.h"
@@ -49,9 +45,7 @@
 #include "Gui/Menu.h"
 #include "Gui/ViewerTab.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
 #include <QOpenGLContext>
-#endif
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846264338327950288   /* pi             */
@@ -230,7 +224,7 @@ static const GLubyte triangleStrip[28] = {
 // |/  |/  |/  |
 // 12--13--14--15
 void
-ViewerGL::Implementation::drawRenderingVAO(unsigned int mipMapLevel,
+ViewerGL::Implementation::drawRenderingVAO(unsigned int mipmapLevel,
                                            int textureIndex,
                                            ViewerGL::DrawPolygonModeEnum polygonMode,
                                            bool background)
@@ -250,8 +244,8 @@ ViewerGL::Implementation::drawRenderingVAO(unsigned int mipMapLevel,
     ///This is the coordinates in the image being rendered where datas are valid, this is in pixel coordinates
     ///at the time we initialize it but we will convert it later to canonical coordinates. See 1)
     const double par = roiRounded.par;
-    const RectD canonicalRoIRoundedToTileSize = roiRounded.toCanonical_noClipping(mipMapLevel, par);
-    const RectD canonicalRoINotRounded = roiNotRounded.toCanonical_noClipping(mipMapLevel, par);
+    const RectD canonicalRoIRoundedToTileSize = roiRounded.toCanonical_noClipping(mipmapLevel, par);
+    const RectD canonicalRoINotRounded = roiNotRounded.toCanonical_noClipping(mipmapLevel, par);
 
     ///the RoD of the image in canonical coords.
     RectD rod = _this->getRoD(textureIndex);
@@ -294,7 +288,8 @@ ViewerGL::Implementation::drawRenderingVAO(unsigned int mipMapLevel,
         {
             QMutexLocker l(&this->userRoIMutex);
             //if the userRoI isn't intersecting the rod, just don't render anything
-            if ( !rod.clipIfOverlaps(this->userRoI) ) {
+            rod.clip(this->userRoI);
+            if ( rod.isNull() ) {
                 return;
             }
         }
@@ -571,11 +566,8 @@ ViewerGL::Implementation::getWipePolygon(const RectD & texRectClipped,
     if (crossProd11 * crossProd21 < 0) {
         QLineF e(texRectClipped.x1, texRectClipped.y1, texRectClipped.x2, texRectClipped.y1);
         QPointF p;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QLineF::IntersectionType t = inter.intersects(e, &p);
-#else
-        QLineF::IntersectType t = inter.intersect(e, &p);
-#endif
+
         if (t == QLineF::BoundedIntersection) {
             *polygonPoints << p;
         }
@@ -586,11 +578,7 @@ ViewerGL::Implementation::getWipePolygon(const RectD & texRectClipped,
     if (crossProd21 * crossProd22 < 0) {
         QLineF e(texRectClipped.x2, texRectClipped.y1, texRectClipped.x2, texRectClipped.y2);
         QPointF p;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QLineF::IntersectionType t = inter.intersects(e, &p);
-#else
-        QLineF::IntersectType t = inter.intersect(e, &p);
-#endif
         if (t == QLineF::BoundedIntersection) {
             *polygonPoints << p;
         }
@@ -601,11 +589,7 @@ ViewerGL::Implementation::getWipePolygon(const RectD & texRectClipped,
     if (crossProd22 * crossProd12 < 0) {
         QLineF e(texRectClipped.x2, texRectClipped.y2, texRectClipped.x1, texRectClipped.y2);
         QPointF p;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QLineF::IntersectionType t = inter.intersects(e, &p);
-#else
-        QLineF::IntersectType t = inter.intersect(e, &p);
-#endif
         if (t == QLineF::BoundedIntersection) {
             *polygonPoints << p;
         }
@@ -616,11 +600,7 @@ ViewerGL::Implementation::getWipePolygon(const RectD & texRectClipped,
     if (crossProd12 * crossProd11 < 0) {
         QLineF e(texRectClipped.x1, texRectClipped.y2, texRectClipped.x1, texRectClipped.y1);
         QPointF p;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         QLineF::IntersectionType t = inter.intersects(e, &p);
-#else
-        QLineF::IntersectType t = inter.intersect(e, &p);
-#endif
         if (t == QLineF::BoundedIntersection) {
             *polygonPoints << p;
         }

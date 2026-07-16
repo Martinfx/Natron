@@ -30,7 +30,7 @@
 #include <locale>
 #include <stdexcept>
 
-#include <QtCore/QMutex>
+#include <QMutex>
 
 #include "Engine/AppManager.h"
 #include "Engine/LibraryBinary.h"
@@ -178,11 +178,7 @@ Plugin::getGrouping() const
     return _grouping;
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
 QRecursiveMutex*
-#else
-QMutex*
-#endif
 Plugin::getPluginLock() const
 {
     return _lock;

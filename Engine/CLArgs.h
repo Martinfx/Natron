@@ -29,15 +29,16 @@
 #include "Global/Macros.h"
 
 #include <list>
+#include <optional>
 #include <string>
 #include <vector>
 #include <utility>
 
 #include "Global/GlobalDefines.h"
 CLANG_DIAG_OFF(deprecated)
-#include <QtCore/QStringList>
-#include <QtCore/QString>
-#include <QtCore/QCoreApplication>
+#include <QStringList>
+#include <QString>
+#include <QCoreApplication>
 CLANG_DIAG_ON(deprecated)
 
 #include "Engine/EngineFwd.h"
@@ -99,7 +100,7 @@ public:
     static void printBackGroundWelcomeMessage();
     static void printUsage(const std::string& programName);
 
-    int getError() const;
+    const std::optional<int>& getError() const;
 
     const std::list<CLArgs::WriterArg>& getWriterArgs() const;
     const std::list<CLArgs::ReaderArg>& getReaderArgs() const;

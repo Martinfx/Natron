@@ -30,11 +30,11 @@
 #include <stdexcept>
 #include <sstream> // stringstream
 
-#include <QtCore/QDebug>
-#include <QtCore/QTimer>
-#include <QtCore/QDateTime>
-#include <QtCore/QFile>
-#include <QtCore/QDir>
+#include <QDebug>
+#include <QTimer>
+#include <QDateTime>
+#include <QFile>
+#include <QDir>
 
 #include "Global/PythonUtils.h"
 
@@ -64,11 +64,7 @@ ProjectPrivate::ProjectPrivate(Project* project)
     , projectCreationTime(ageSinceLastSave)
     , builtinFormats()
     , additionalFormats()
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     , formatMutex()
-#else
-    , formatMutex(QMutex::Recursive)
-#endif
     , envVars()
     , projectName()
     , projectPath()

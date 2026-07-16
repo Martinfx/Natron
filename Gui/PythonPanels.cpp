@@ -30,7 +30,7 @@
 
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
-#include <QtCore/QMutex>
+#include <QMutex>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 CLANG_DIAG_ON(deprecated)
@@ -334,7 +334,6 @@ PyModalDialog::getParam(const QString& scriptName) const
     return Effect::createParamWrapperForKnob(knob);
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 QSize
 PyModalDialog::minimumSizeHint() const
 {
@@ -346,7 +345,6 @@ PyModalDialog::sizeHint() const
 {
     return QWidget::sizeHint();
 }
-#endif
 
 struct PyPanelPrivate
 {
@@ -430,6 +428,7 @@ PyPanel::PyPanel(const QString& scriptName,
 
 PyPanel::~PyPanel()
 {
+    getGui()->unregisterTab(this);
     getGui()->unregisterPyPanel(this);
 }
 
@@ -539,7 +538,7 @@ PyPanel::mousePressEvent(QMouseEvent* e)
 }
 
 void
-PyPanel::enterEvent(QEvent* e)
+PyPanel::enterEvent(QtCompat::QEnterEvent* e)
 {
     enterEventBase();
     QWidget::enterEvent(e);

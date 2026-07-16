@@ -30,15 +30,11 @@
 
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
-#include <QtCore/QSize>
+#include <QSize>
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include <QtWidgets/QWidget>
-#else
-#include <QtGui/QWidget>
-#endif
+#include <QWidget>
 
-#include <QtGui/QColor>
+#include <QColor>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 

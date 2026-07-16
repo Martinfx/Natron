@@ -30,8 +30,8 @@
 
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
-#include <QtCore/QMutex>
-#include <QtCore/QSize>
+#include <QMutex>
+#include <QSize>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
@@ -41,11 +41,6 @@ CLANG_DIAG_ON(uninitialized)
 #include "Gui/ViewerGL.h"
 #include "Gui/ZoomContext.h"
 #include "Gui/GuiFwd.h"
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 4, 0)
-#include "Gui/QGLExtrasCompat.h"
-#endif
-
 
 #define WIPE_MIX_HANDLE_LENGTH 50.
 #define WIPE_ROTATE_HANDLE_LENGTH 100.
@@ -109,7 +104,7 @@ struct TextureInfo
         , gain(1.)
         , gamma(1.)
         , offset(0.)
-        , mipMapLevel(0)
+        , mipmapLevel(0)
         , premult(eImagePremultiplicationOpaque)
         , time(0)
         , rod()
@@ -127,7 +122,7 @@ struct TextureInfo
     double gain;
     double gamma;
     double offset;
-    unsigned int mipMapLevel;
+    unsigned int mipmapLevel;
     ImagePremultiplicationEnum premult;
     SequenceTime time;
     RectD rod;
@@ -240,7 +235,7 @@ public:
      *@brief Fill the rendering VAO with vertices and texture coordinates
      * that depends upon the currently displayed texture.
      **/
-    void drawRenderingVAO(unsigned int mipMapLevel, int textureIndex, DrawPolygonModeEnum polygonMode, bool background);
+    void drawRenderingVAO(unsigned int mipmapLevel, int textureIndex, DrawPolygonModeEnum polygonMode, bool background);
 
     void initializeGL();
 

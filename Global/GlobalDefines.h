@@ -26,6 +26,7 @@
 #include <Python.h>
 // ***** END PYTHON BLOCK *****
 
+#include <cstdint>
 #include <utility>
 #if defined(_WIN32)
 #include <string>
@@ -47,19 +48,17 @@
 #undef isalpha
 #undef isalnum
 
-#if !defined(Q_MOC_RUN) && !defined(SBK_RUN)
-#include <cstdint>
-#endif
-#include <QtCore/QtGlobal>
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include <QtCore/QForeachContainer>
-#endif
-#include <QtCore/QString>
+#include <QtGlobal>
+#include <QString>
 CLANG_DIAG_OFF(deprecated)
-#include <QtCore/QMetaType>
+#include <QMetaType>
 CLANG_DIAG_ON(deprecated)
 #include "Global/Enums.h"
 
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 15, 3)
+#error "Qt versions earlier than 5.15.3 are not supported."
+#endif
 
 // boost and C++11 also have a foreach. this breaks it. DON'T UNCOMMENT THIS.
 //#undef foreach
@@ -75,18 +74,6 @@ typedef std::uint16_t U16;
 NATRON_NAMESPACE_ENTER
 
 typedef int SequenceTime;
-
-struct RenderScale
-    : public OfxPointD
-{
-    RenderScale() { x = y = 1.; }
-
-    RenderScale(double scale) { x = y = scale; }
-
-    RenderScale(double scaleX,
-                double scaleY) { x = scaleX; y = scaleY; }
-};
-
 typedef OfxPointD Point;
 typedef OfxRGBAColourF RGBAColourF;
 typedef OfxRGBAColourD RGBAColourD;

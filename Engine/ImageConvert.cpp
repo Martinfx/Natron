@@ -29,7 +29,7 @@
 #include <cassert>
 #include <stdexcept>
 
-#include <QtCore/QDebug>
+#include <QDebug>
 
 #include "Engine/AppManager.h"
 #include "Engine/Lut.h"
@@ -114,6 +114,9 @@ lutFromColorspace(ViewerColorSpaceEnum cs)
         break;
     case eViewerColorSpaceRec709:
         lut = Color::LutManager::Rec709Lut();
+        break;
+    case eViewerColorSpaceBT1886:
+        lut = Color::LutManager::BT1886Lut();
         break;
     case eViewerColorSpaceLinear:
     default:

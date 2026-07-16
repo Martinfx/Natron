@@ -38,8 +38,8 @@
 #endif
 
 #ifdef __cplusplus
-#if __cplusplus < 201402L
-#error "Natron 2.5+ requires C++14"
+#if __cplusplus < 201703L
+#error "Natron 2.6+ requires C++17"
 #endif
 // Establish the name space.
 namespace Natron { }
@@ -52,7 +52,6 @@ namespace Python { }
 
 // run shiboken without the Natron namespace, and add NATRON_NAMESPACE_USING to each cpp afterwards
 #define NATRON_NAMESPACE
-#undef NATRON_ENUM
 #define NATRON_NAMESPACE_ENTER
 #define NATRON_NAMESPACE_EXIT
 #define NATRON_PYTHON_NAMESPACE
@@ -62,7 +61,6 @@ namespace Python { }
 #else // !SBK_RUN
 
 #define NATRON_NAMESPACE Natron
-#define NATRON_ENUM NATRON_NAMESPACE
 // Macros to use in each file to enter and exit the right name spaces.
 #define NATRON_NAMESPACE_ENTER namespace NATRON_NAMESPACE {
 #define NATRON_NAMESPACE_EXIT }
@@ -455,6 +453,9 @@ GCC_ONLY_DIAG_OFF(pragmas)  // warning: unknown option after '#pragma GCC diagno
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 /* COMPILER() - the compiler being used to build the project */
+#ifdef COMPILER
+#undef COMPILER
+#endif
 #define COMPILER(NATRON_FEATURE) (NATRON_COMPILER_ ## NATRON_FEATURE)
 
 /* COMPILER_SUPPORTS() - whether the compiler being used to build the project supports the given feature. */

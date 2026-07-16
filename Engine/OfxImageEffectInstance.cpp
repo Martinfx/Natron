@@ -36,8 +36,8 @@
 
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
-#include <QtCore/QDateTime>
-#include <QtCore/QDebug>
+#include <QDateTime>
+#include <QDebug>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
@@ -442,9 +442,9 @@ OfxImageEffectInstance::getRenderScaleRecursive(double &x,
     ///get the render scale of the 1st viewer
     if ( !attachedViewers.empty() ) {
         ViewerInstance* first = attachedViewers.front();
-        int mipMapLevel = first->getMipMapLevel();
-        x = Image::getScaleFromMipMapLevel( (unsigned int)mipMapLevel );
-        y = x;
+        const auto scale = RenderScale::fromMipmapLevel(first->getMipmapLevel()).toOfxPointD();
+        x = scale.x;
+        y = scale.y;
     } else {
         x = 1.;
         y = 1.;

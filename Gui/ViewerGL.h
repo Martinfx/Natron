@@ -34,13 +34,11 @@
 
 #include "Global/GLIncludes.h" //!<must be included before QGlWidget because of gl.h and glew.h
 
-#include <QtCore/QSize>
+#include <QSize>
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
 #include <QOpenGLWidget>
-#else
-#include "Gui/QGLWidgetCompat.h"
-#endif
+
+#include "Global/QtCompat.h"
 
 #include "Engine/OpenGLViewerI.h"
 #include "Engine/ViewIdx.h"
@@ -128,9 +126,9 @@ public:
     /**
      * @brief Returns the rectangle of the image displayed by the viewer
      **/
-    virtual RectI getImageRectangleDisplayed(const RectI & imageRoD, const double par, unsigned int mipMapLevel) OVERRIDE FINAL;
-    virtual RectI getExactImageRectangleDisplayed(int texIndex, const RectD & rod, const double par, unsigned int mipMapLevel) OVERRIDE FINAL;
-    virtual RectI getImageRectangleDisplayedRoundedToTileSize(int texIndex, const RectD & rod, const double par, unsigned int mipMapLevel, std::vector<RectI>* tiles, std::vector<RectI>* tilesRounded, int *tileSize, RectI* roiNotRounded) OVERRIDE FINAL WARN_UNUSED_RETURN;
+    virtual RectI getImageRectangleDisplayed(const RectI & imageRoD, const double par, unsigned int mipmapLevel) OVERRIDE FINAL;
+    virtual RectI getExactImageRectangleDisplayed(int texIndex, const RectD & rod, const double par, unsigned int mipmapLevel) OVERRIDE FINAL;
+    virtual RectI getImageRectangleDisplayedRoundedToTileSize(int texIndex, const RectD & rod, const double par, unsigned int mipmapLevel, std::vector<RectI>* tiles, std::vector<RectI>* tilesRounded, int *tileSize, RectI* roiNotRounded) OVERRIDE FINAL WARN_UNUSED_RETURN;
     /**
      *@brief Set the pointer to the InfoViewerWidget. This is called once after creation
      * of the ViewerGL.
@@ -181,7 +179,7 @@ public:
                                                const RectD& rod,
                                                double par,
                                                ImageBitDepthEnum depth,
-                                               unsigned int mipMapLevel,
+                                               unsigned int mipmapLevel,
                                                ImagePremultiplicationEnum premult,
                                                double gain,
                                                double gamma,
@@ -426,7 +424,7 @@ public:
      **/
     ImagePtr getLastRenderedImage(int textureIndex) const;
 
-    ImagePtr getLastRenderedImageByMipMapLevel(int textureIndex, unsigned int mipMapLevel) const;
+    ImagePtr getLastRenderedImageByMipmapLevel(int textureIndex, unsigned int mipmapLevel) const;
 
     /**
      * @brief Get the color of the currently displayed image at position x,y.
@@ -437,17 +435,17 @@ public:
      * @return true if the point is inside the image and colors were set
      **/
     bool getColorAt(double x, double y, bool forceLinear, int textureIndex, float* r,
-                    float* g, float* b, float* a, unsigned int* mipMapLevel) WARN_UNUSED_RETURN;
+                    float* g, float* b, float* a, unsigned int* mipmapLevel) WARN_UNUSED_RETURN;
 
     // same as getColor, but computes the mean over a given rectangle
     bool getColorAtRect(const RectD &rect, // rectangle in canonical coordinates
-                        bool forceLinear, int textureIndex, float* r, float* g, float* b, float* a, unsigned int* mipMapLevel);
+                        bool forceLinear, int textureIndex, float* r, float* g, float* b, float* a, unsigned int* mipmapLevel);
 
 
-    virtual unsigned int getCurrentRenderScale() const OVERRIDE FINAL;
+    virtual unsigned int getCurrentMipmapLevel() const OVERRIDE FINAL;
 
-    ///same as getMipMapLevel but with the zoomFactor taken into account
-    int getMipMapLevelCombinedToZoomFactor() const WARN_UNUSED_RETURN;
+    ///same as getMipmapLevel but with the zoomFactor taken into account
+    unsigned int getMipmapLevelCombinedToZoomFactor() const WARN_UNUSED_RETURN;
 
     virtual int getCurrentlyDisplayedTime() const OVERRIDE FINAL WARN_UNUSED_RETURN;
 
@@ -498,7 +496,7 @@ private:
     virtual void wheelEvent(QWheelEvent* e) OVERRIDE FINAL;
     virtual void focusInEvent(QFocusEvent* e) OVERRIDE FINAL;
     virtual void focusOutEvent(QFocusEvent* e) OVERRIDE FINAL;
-    virtual void enterEvent(QEvent* e) OVERRIDE FINAL;
+    virtual void enterEvent(QtCompat::QEnterEvent* e) OVERRIDE FINAL;
     virtual void leaveEvent(QEvent* e) OVERRIDE FINAL;
     virtual void tabletEvent(QTabletEvent* e) OVERRIDE FINAL;
 
@@ -562,7 +560,7 @@ private:
     /**
      *@brief Called inside paintGL(). It will draw all the overlays.
      **/
-    void drawOverlay(unsigned int mipMapLevel);
+    void drawOverlay(unsigned int mipmapLevel);
 
     /**
      * @brief Called by drawOverlay to draw the user region of interest.

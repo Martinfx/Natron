@@ -44,16 +44,16 @@
 #endif
 
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QTimer>
-#include <QtCore/QThread>
-#include <QtCore/QDir>
-#include <QtCore/QDirIterator>
-#include <QtCore/QTemporaryFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QDebug>
-#include <QtCore/QTextStream>
-#include <QtNetwork/QHostInfo>
+#include <QCoreApplication>
+#include <QTimer>
+#include <QThread>
+#include <QDir>
+#include <QDirIterator>
+#include <QTemporaryFile>
+#include <QFileInfo>
+#include <QDebug>
+#include <QTextStream>
+#include <QHostInfo>
 #include <QtConcurrentRun> // QtCore on Qt4, QtConcurrent on Qt5
 
 #include <ofxhXml.h> // OFX::XML::escape
@@ -1001,6 +1001,7 @@ Project::initializeKnobs()
     colorSpaces.push_back(ChoiceOption("Linear","",""));
     colorSpaces.push_back(ChoiceOption("sRGB","",""));
     colorSpaces.push_back(ChoiceOption("Rec.709","",""));
+    colorSpaces.push_back(ChoiceOption("BT1886","",""));
 
     _imp->colorSpace8u = AppManager::createKnob<KnobChoice>( this, tr("8-Bit LUT") );
     _imp->colorSpace8u->setName("defaultColorSpace8u");

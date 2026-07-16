@@ -19,7 +19,7 @@
 
 #include "Gui/Gui.h"
 
-#include <QtCore/QtGlobal> // for Q_OS_*
+#include <QtGlobal> // for Q_OS_*
 #ifdef Q_OS_DARWIN
 
 #include <AppKit/NSView.h>
@@ -87,18 +87,6 @@ static NSString* const NSBackingPropertyOldScaleFactorKey =
 #endif  // MAC_OS_X_VERSION_10_7
 
 NATRON_NAMESPACE_ENTER
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-qreal
-QtMac::devicePixelRatioInternal(const QWidget* w) {
-    CGFloat scaleFactor = 1.0;
-    NSView* view = reinterpret_cast<NSView*>(w->winId());
-    if ([[view window] respondsToSelector: @selector(backingScaleFactor)])
-        scaleFactor = [[view window] backingScaleFactor];
-
-    return qreal(scaleFactor);
-}
-#endif
 
 #if OBJC_OLD_DISPATCH_PROTOTYPES != 1
 void

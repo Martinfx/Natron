@@ -23,7 +23,7 @@
 #include <Python.h>
 // ***** END PYTHON BLOCK *****
 
-#include <QtCore/QtGlobal> // for Q_OS_*
+#include <QtGlobal> // for Q_OS_*
 #if defined(Q_OS_UNIX)
 #include <sys/time.h>     // for getrlimit on linux
 #include <sys/resource.h> // for getrlimit
@@ -94,6 +94,16 @@ int main(int argc, char *argv[])
             freopen("CONOUT$", "w", stderr);
         }
     }
+#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+    // Set window title bar color based on dark/light theme
+    // https://www.qt.io/blog/dark-mode-on-windows-11-with-qt-6.5
+    // https://learn.microsoft.com/en-us/answers/questions/1161597/how-to-detect-windows-application-dark-mode
+    QSettings registry(QString::fromUtf8("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
+                       QSettings::NativeFormat);
+    if (registry.value(QString::fromUtf8("AppsUseLightTheme"), 0).toInt() == 0) {
+        qputenv("QT_QPA_PLATFORM", "windows:darkmode=1");
+    }
+#endif
 #endif
 
 #if defined(Q_OS_UNIX) && defined(RLIMIT_NOFILE)
@@ -129,8 +139,9 @@ int main(int argc, char *argv[])
     CLArgs::printBackGroundWelcomeMessage();
     CLArgs args(argc, argv, false);
 
-    if (args.getError() > 0) {
-        return 1;
+    const auto error = args.getError();
+    if (error) {
+        return error.value();
     }
 
     if ( args.isBackgroundMode() ) {

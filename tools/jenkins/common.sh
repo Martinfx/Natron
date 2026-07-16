@@ -62,7 +62,7 @@ Darwin)
     PKGOS=${PKGOS:-OSX}
     if [ "$(uname -m)" = "arm64" ]; then
         # No Qt4 on apple Silicon
-        QT_VERSION_MAJOR=${QT_MAJOR_VERSION:-5}
+        QT_VERSION_MAJOR=${QT_VERSION_MAJOR:-5}
     fi
     ;;
 *)
@@ -247,14 +247,11 @@ PY_EXE="$SDK_HOME/bin/python${PYV}"
 # export PYTHON_PATH PYTHON_INCLUDE
 
 
-QT_VERSION_MAJOR=${QT_VERSION_MAJOR:-4}
-if version_gt "${RELEASE_TAG:-0}" 2.5.99; then
-    QT_VERSION_MAJOR=5
+QT_VERSION_MAJOR=${QT_VERSION_MAJOR:-5}
+if [[ ${QT_VERSION_MAJOR} -lt 5 ]]; then
+    echo "QT_VERSION_MAJOR ${QT_VERSION_MAJOR} not supported."
+    exit 1
 fi
-case "${GIT_BRANCH:-}" in
-RB-2.[6789])
-    QT_VERSION_MAJOR=5
-esac
 
 unset LD_LIBRARY_PATH LD_RUN_PATH DYLD_LIBRARY_PATH LIBRARY_PATH CPATH PKG_CONFIG_PATH
 # save the default PATH to avoid growing it each time we source this file
@@ -380,7 +377,9 @@ else
     OSMESA_PATH="$SDK_HOME/osmesa"
 fi
 
-if [ -d "$SDK_HOME/llvm" ]; then
+if [ -n "${LLVM_PREFIX:-}" ]; then
+    LLVM_PATH="${LLVM_PREFIX}"
+elif [ -d "$SDK_HOME/llvm" ]; then
     LLVM_PATH="$SDK_HOME/llvm"
 elif [ -d "/opt/llvm" ]; then
     LLVM_PATH="/opt/llvm"
@@ -404,6 +403,8 @@ else
 fi
 export QTDIR
 
+BOOST_ROOT="$SDK_HOME"
+
 PKG_CONFIG_PATH=
 if [ "$PKGOS" = "Linux" ]; then
     PATH="$SDK_HOME/bin:$QTDIR/bin:$SDK_HOME/gcc/bin:$FFMPEG_PATH/bin:$LIBRAW_PATH/bin:$PATH"
@@ -416,7 +417,14 @@ elif [ "$PKGOS" = "Windows" ]; then
 elif [ "$PKGOS" = "OSX" ]; then
     PKG_CONFIG_PATH="$FFMPEG_PATH/lib/pkgconfig:$LIBRAW_PATH/lib/pkgconfig:$OSMESA_PATH/lib/pkgconfig:$PYTHON_HOME/lib/pkgconfig:$QTDIR/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
 fi
-export LD_LIBRARY_PATH LD_RUN_PATH DYLD_LIBRARY_PATH LIBRARY_PATH CPATH PKG_CONFIG_PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
+export LD_LIBRARY_PATH LD_RUN_PATH DYLD_LIBRARY_PATH LIBRARY_PATH CPATH PKG_CONFIG_PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH BOOST_ROOT
+
+if [ "${QT_VERSION_MAJOR}" = 4 ]; then
+    QT_VERSION=$(pkg-config --modversion QtCore)
+else
+    QT_VERSION=$(pkg-config --modversion Qt${QT_VERSION_MAJOR}Core)
+fi
+QT_VERSION_MINOR=$(echo $QT_VERSION | cut -d. -f2)
 
 # Load compiler related stuff
 source $CWD/compiler-common.sh

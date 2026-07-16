@@ -27,12 +27,10 @@
 
 #include <gtest/gtest.h>
 
-#include <QtCore/QString>
-#include <QtCore/QDir>
+#include <QString>
+#include <QDir>
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QRandomGenerator>
-#endif
 
 #include "Engine/FileSystemModel.h"
 #include "Engine/StandardPaths.h"
@@ -54,11 +52,7 @@ TEST(SequenceParsing, TestHashCharacter) {
     ///create temporary files as a sequence and try to read that sequence.
     QString tempPath = StandardPaths::writableLocation(StandardPaths::eStandardLocationTemp);
     QDir dir(tempPath);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QString dirName = QString::fromUtf8("NatronUnitTest") + QString::number( QRandomGenerator::global()->generate() );
-#else
-    QString dirName = QString::fromUtf8("NatronUnitTest") + QString::number( qrand() );
-#endif
 
     dir.mkpath( QString::fromUtf8(".") );
     dir.mkdir(dirName);
@@ -229,11 +223,7 @@ TEST(SequenceParsing, TestPrintfLikeSyntax) {
     ///create temporary files as a sequence and try to read that sequence.
     QString tempPath = StandardPaths::writableLocation(StandardPaths::eStandardLocationTemp);
     QDir dir(tempPath);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QString dirName = QString::fromUtf8("NatronUnitTest") + QString::number( QRandomGenerator::global()->generate() );
-#else
-    QString dirName = QString::fromUtf8("NatronUnitTest") + QString::number( qrand() );
-#endif
     dir.mkpath( QString::fromUtf8(".") );
     dir.mkdir(dirName);
     dir.cd(dirName);
@@ -341,11 +331,7 @@ TEST(SequenceParsing, TestViews) {
     ///create temporary files as a sequence and try to read that sequence.
     QString tempPath = StandardPaths::writableLocation(StandardPaths::eStandardLocationTemp);
     QDir dir(tempPath);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QString dirName = QString::fromUtf8("NatronUnitTest") + QString::number( QRandomGenerator::global()->generate() );
-#else
-    QString dirName = QString::fromUtf8("NatronUnitTest") + QString::number( qrand() );
-#endif
 
     dir.mkpath( QString::fromUtf8(".") );
     dir.mkdir(dirName);

@@ -35,15 +35,15 @@
 //----------------------------------------------------------------------------
 
 #if defined(__NATRON_WIN32__) && !defined(__NATRON_MINGW__)
-#include <windows.h>
+#include <winsock2.h>
 #else
 #include <sys/time.h>
 #endif
 
 
-#include <QtCore/QString>
-#include <QtCore/QObject>
-#include <QtCore/QMutex>
+#include <QString>
+#include <QObject>
+#include <QMutex>
 
 #include "Engine/EngineFwd.h"
 

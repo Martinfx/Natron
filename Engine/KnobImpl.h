@@ -35,18 +35,10 @@
 #include <string>
 #include <algorithm> // min, max
 
-#include <QtCore/QString>
-#include <QtCore/QDebug>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QThread>
-
-// clang-format off
-CLANG_DIAG_OFF(mismatched-tags)
-GCC_DIAG_OFF(unused-parameter)
-#include <shiboken.h>
-CLANG_DIAG_ON(mismatched-tags)
-GCC_DIAG_ON(unused-parameter)
-// clang-format on
+#include <QString>
+#include <QDebug>
+#include <QCoreApplication>
+#include <QThread>
 
 #include "Global/PythonUtils.h"
 
@@ -101,31 +93,19 @@ Knob<T>::Knob(KnobHolder*  holder,
               int dimension,
               bool declaredByPlugin )
     : KnobHelper(holder, description, dimension, declaredByPlugin)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     , _valueMutex()
-#else
-    , _valueMutex(QMutex::Recursive)
-#endif
     , _values(dimension)
     , _guiValues(dimension)
     , _defaultValues(dimension)
     , _exprRes(dimension)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     , _minMaxMutex()
-#else
-    , _minMaxMutex(QReadWriteLock::Recursive)
-#endif
     , _minimums(dimension)
     , _maximums(dimension)
     , _displayMins(dimension)
     , _displayMaxs(dimension)
     , _setValuesQueueMutex()
     , _setValuesQueue()
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     , _setValueRecursionLevelMutex()
-#else
-    , _setValueRecursionLevelMutex(QMutex::Recursive)
-#endif
     , _setValueRecursionLevel(0)
 {
     initMinMax();
@@ -358,9 +338,7 @@ template <>
 int
 KnobHelper::pyObjectToType(PyObject* o)
 {
-    if (PyInt_Check(o)) {
-        return (int)PyInt_AsLong(o);
-    } else if (PyLong_Check(o)) {
+    if (PyLong_Check(o)) {
         return (int)PyLong_AsLong(o);
     } else if (PyFloat_Check(o)) {
         return (int)PyFloat_AsDouble(o);
@@ -383,9 +361,7 @@ template <>
 double
 KnobHelper::pyObjectToType(PyObject* o)
 {
-    if (PyInt_Check(o)) {
-        return (double)PyInt_AsLong(o);
-    } else if (PyLong_Check(o)) {
+    if (PyLong_Check(o)) {
         return (double)PyLong_AsLong(o);
     } else if (PyFloat_Check(o)) {
         return PyFloat_AsDouble(o);
@@ -474,8 +450,6 @@ Knob<T>::evaluateExpression_pod(double time,
 
     if ( PyFloat_Check(ret) ) {
         *value =  PyFloat_AsDouble(ret);
-    } else if ( PyInt_Check(ret) ) {
-        *value = (double)PyInt_AsLong(ret);
     } else if ( PyLong_Check(ret) ) {
         *value = (double)PyLong_AsLong(ret);
     } else if (PyObject_IsTrue(ret) == 1) {
@@ -2614,9 +2588,10 @@ Knob<T>::copyValueForTypeAndCheckIfChanged(Knob<OTHERTYPE>* other,
         int dimMin = std::min( getDimension(), other->getDimension() );
         std::vector<OTHERTYPE> v = other->getValueForEachDimension_mt_safe_vector();
         for (int i = 0; i < dimMin; ++i) {
-            if (_values[i] != v[i]) {
-                _values[i] = v[i];
-                _guiValues[i] = v[i];
+            const T convertedV = static_cast<T>(v[i]);
+            if (_values[i] != convertedV) {
+                _values[i] = convertedV;
+                _guiValues[i] = convertedV;
                 ret = true;
             }
         }

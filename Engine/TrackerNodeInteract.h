@@ -30,8 +30,8 @@
 
 #include <QFutureWatcher>
 #include <QtConcurrentRun>
-#include <QtCore/QPointF>
-#include <QtCore/QRectF>
+#include <QPointF>
+#include <QRectF>
 
 #include <ofxNatron.h>
 
@@ -375,7 +375,7 @@ public:
     GLuint pboID;
     TrackWatcherPtr imageGetterWatcher;
     bool showMarkerTexture;
-    RenderScale selectedMarkerScale;
+    double selectedMarkerScale;
     ImageWPtr selectedMarkerImg;
     bool isTracking;
 

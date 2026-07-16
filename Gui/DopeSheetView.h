@@ -33,11 +33,7 @@
 
 #include <QTreeWidget>
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
 #include <QOpenGLWidget>
-#else
-#include "Gui/QGLWidgetCompat.h"
-#endif
 
 #include "Engine/OverlaySupport.h"
 #include "Engine/ViewIdx.h"
@@ -137,7 +133,6 @@ public:
     void getBackgroundColour(double &r, double &g, double &b) const OVERRIDE FINAL;
     void saveOpenGLContext() OVERRIDE FINAL;
     void restoreOpenGLContext() OVERRIDE FINAL;
-    unsigned int getCurrentRenderScale() const OVERRIDE FINAL;
     virtual RectD getViewportRect() const OVERRIDE FINAL WARN_UNUSED_RETURN;
     virtual void getCursorPosition(double& x, double& y) const OVERRIDE FINAL;
 

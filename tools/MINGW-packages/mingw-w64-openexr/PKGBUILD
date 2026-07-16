@@ -3,16 +3,22 @@
 _realname=openexr
 pkgbase=mingw-w64-natron_${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-natron_${_realname}")
-pkgver=3.1.8
+pkgver=3.3.2
 pkgrel=99.1
 pkgdesc='A high dynamic-range image file format library (mingw-w64)'
 arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32' 'clangarm64')
 url="https://www.openexr.com/"
-license=('BSD')
+msys2_repository_url='https://github.com/AcademySoftwareFoundation/openexr'
+msys2_references=(
+  "pypi: OpenEXR"
+  "cpe: cpe:/a:ilm:openexr"
+  "cpe: cpe:/a:openexr:openexr"
+)
+license=('spdx:BSD-3-Clause')
 depends=("${MINGW_PACKAGE_PREFIX}-natron_imath"
-         "${MINGW_PACKAGE_PREFIX}-libwinpthread-git"
-         "${MINGW_PACKAGE_PREFIX}-zlib")
+         "${MINGW_PACKAGE_PREFIX}-libdeflate"
+         "${MINGW_PACKAGE_PREFIX}-libwinpthread-git")
 makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
              "${MINGW_PACKAGE_PREFIX}-cmake"
              "${MINGW_PACKAGE_PREFIX}-ninja")
@@ -26,9 +32,11 @@ replaces=(
   "${MINGW_PACKAGE_PREFIX}-pyilmbase"
 )
 source=("https://github.com/openexr/openexr/archive/v${pkgver}/${_realname}-${pkgver}.tar.gz"
-        0006-cmake-soversion.patch)
-sha256sums=('3ff47111ef7e5da6f69330e66e1e90ae620b79df1cedf2512bb9bffe86c2c617'
-            'e65852ac2e5545472ad90830c97e964aa2c71e1795979a8b9867155d578d45ed')
+        0006-cmake-soversion.patch
+        0007-export-TypedAttribute-value.patch)
+sha256sums=('5013e964de7399bff1dd328cbf65d239a989a7be53255092fa10b85a8715744d'
+            '5653da878ebbf5f3087bb529213931b48e151aef082b34e19d189e22be0411e7'
+            '204777b48cde1c4d390789f10c5e429d5295be701f68a7937a90d0ecf271c048')
 
 # Helper macros to help make tasks easier #
 apply_patch_with_msg() {
@@ -43,7 +51,8 @@ prepare(){
   cd "${srcdir}/${_realname}-${pkgver}"
 
   apply_patch_with_msg \
-    0006-cmake-soversion.patch
+    0006-cmake-soversion.patch \
+    0007-export-TypedAttribute-value.patch
 }
 
 build() {
@@ -56,10 +65,6 @@ build() {
     extra_config+=("-DCMAKE_BUILD_TYPE=Debug")
   fi
 
-  if [[ ${MINGW_PACKAGE_PREFIX} == *-clang-* ]]; then
-    extra_config+=("-DOPENEXR_BUILD_TOOLS=OFF")
-  fi
-
   CXXFLAGS+=" -Wno-ignored-attributes"
 
   MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
@@ -69,19 +74,18 @@ build() {
       ${extra_config[@]} \
       -DBUILD_SHARED_LIBS=ON \
       -DBUILD_TESTING=OFF \
-      -DOPENEXR_INSTALL_EXAMPLES=OFF \
-      -DOPENEXR_INSTALL_PKG_CONFIG=ON \
+      -DOPENEXR_BUILD_EXAMPLES=OFF \
       ../${_realname}-${pkgver}
 
   ${MINGW_PREFIX}/bin/cmake --build .
 }
 
-#check() {
-#  cd "${srcdir}/build-${MSYSTEM}"
-#  ${MINGW_PREFIX}/bin/cmake -DBUILD_TESTING=ON ../${_realname}-${pkgver}
-#  ${MINGW_PREFIX}/bin/cmake --build .
-#  ${MINGW_PREFIX}/bin/ctest.exe ./ || true
-#}
+check() {
+  cd "${srcdir}/build-${MSYSTEM}"
+  ${MINGW_PREFIX}/bin/cmake -DBUILD_TESTING=ON ../${_realname}-${pkgver}
+  ${MINGW_PREFIX}/bin/cmake --build .
+  ${MINGW_PREFIX}/bin/ctest.exe ./ || true
+}
 
 package() {
   cd "${srcdir}/build-${MSYSTEM}"

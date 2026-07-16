@@ -31,11 +31,7 @@
 #include "Global/GLIncludes.h" //!<must be included before QGlWidget because of gl.h and glew.h
 #include "Global/GlobalDefines.h"
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
 #include <QOpenGLWidget>
-#else
-#include "Gui/QGLWidgetCompat.h"
-#endif
 
 #include "Engine/OverlaySupport.h"
 
@@ -84,7 +80,6 @@ public:
     virtual void getBackgroundColour(double &r, double &g, double &b) const OVERRIDE FINAL;
     virtual void saveOpenGLContext() OVERRIDE FINAL;
     virtual void restoreOpenGLContext() OVERRIDE FINAL;
-    virtual unsigned int getCurrentRenderScale() const OVERRIDE FINAL { return 0; }
 
     virtual RectD getViewportRect() const OVERRIDE FINAL WARN_UNUSED_RETURN;
     virtual void getCursorPosition(double& x, double& y) const OVERRIDE FINAL;

@@ -45,12 +45,13 @@
 #include <stdexcept>
 
 // —— general includes —————————————————————————
-#include <windows.h>
+#include <Dde.h>
+
 #include <QMessageBox>
 #include <QApplication>
-#include <QtCore/QDir>
-#include <QtCore/QFileInfo>
-#include <QtCore/QRegExp>
+#include <QDir>
+#include <QFileInfo>
+#include <QRegExp>
 
 NATRON_NAMESPACE_ENTER
 
@@ -87,7 +88,6 @@ DocumentWindow::~DocumentWindow()
 // —— public slots ——————————————————————————
 // —— protected slots —————————————————————————
 // —— events ————————————————————————————
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 bool
 DocumentWindow::nativeEvent(const QByteArray& eventType, void* message, long* result)
 {
@@ -109,28 +109,6 @@ DocumentWindow::nativeEvent(const QByteArray& eventType, void* message, long* re
 
     return QMainWindow::nativeEvent(eventType, message, result);
 }
-#else
-bool
-DocumentWindow::winEvent(MSG* msg,  long *result)
-{
-    switch (msg->message) {
-    case WM_DDE_INITIATE:
-
-        return ddeInitiate(msg, result);
-        break;
-    case WM_DDE_EXECUTE:
-
-        return ddeExecute(msg, result);
-        break;
-    case WM_DDE_TERMINATE:
-
-        return ddeTerminate(msg, result);
-        break;
-    }
-
-    return QMainWindow::winEvent(msg, result);
-}
-#endif
 
 void
 DocumentWindow::ddeOpenFile(const QString&)

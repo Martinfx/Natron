@@ -34,9 +34,9 @@
 
 // clang-format off
 CLANG_DIAG_OFF(deprecated-declarations)
-#include <QtCore/QObject>
-#include <QtCore/QMutex>
-#include <QtCore/QMetaType>
+#include <QObject>
+#include <QMutex>
+#include <QMetaType>
 CLANG_DIAG_ON(deprecated-declarations)
 // clang-format on
 
@@ -136,7 +136,7 @@ public:
 
 
     ///bbox is in canonical coords
-    void evaluateStroke(unsigned int mipMapLevel, double time,
+    void evaluateStroke(unsigned int mipmapLevel, double time,
                         std::list<std::list<std::pair<Point, double> > >* strokes,
                         RectD* bbox = 0) const;
 

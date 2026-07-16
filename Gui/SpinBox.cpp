@@ -32,13 +32,13 @@
 
 GCC_DIAG_UNUSED_PRIVATE_FIELD_OFF
 // /opt/local/include/QtGui/qmime.h:119:10: warning: private field 'type' is not used [-Wunused-private-field]
-#include <QtGui/QWheelEvent>
+#include <QWheelEvent>
 GCC_DIAG_UNUSED_PRIVATE_FIELD_ON
-#include <QtGui/QDoubleValidator>
-#include <QtGui/QIntValidator>
+#include <QDoubleValidator>
+#include <QIntValidator>
 #include <QStyle> // in QtGui on Qt4, in QtWidgets on Qt5
 #include <QApplication>
-#include <QtCore/QDebug>
+#include <QDebug>
 #include <QMenu>
 #include <QPainter>
 
@@ -628,23 +628,14 @@ SpinBox::wheelEvent(QWheelEvent* e)
     if (ignoreWheelEvent) {
         return LineEdit::wheelEvent(e);
     }
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     if ( (e->angleDelta().x() != 0) ||
          ( e->angleDelta().y() == 0) ||
-#else
-    if ( (e->orientation() != Qt::Vertical) ||
-         ( e->delta() == 0) ||
-#endif
          !isEnabled() ||
          isReadOnly() ||
          !hasFocus() ) { // wheel is only effective when the widget has focus (click it first, then wheel)
         return;
     }
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     int delta = e->angleDelta().y();
-#else
-    int delta = e->delta();
-#endif
     int shift = 0;
     if ( modCASIsShift(e) ) {
         shift = 1;
@@ -1009,7 +1000,7 @@ KnobSpinBox::~KnobSpinBox()
 }
 
 void
-KnobSpinBox::enterEvent(QEvent* e)
+KnobSpinBox::enterEvent(QtCompat::QEnterEvent* e)
 {
     _dnd->mouseEnter(e);
     SpinBox::enterEvent(e);

@@ -31,7 +31,7 @@
 #include <omp.h>
 #endif
 
-#include <QtCore/QThreadPool>
+#include <QThreadPool>
 
 #include "Engine/AppInstance.h"
 #include "Engine/Curve.h"
@@ -1499,7 +1499,7 @@ TrackerContextPrivate::getInputRoDAtTime(double time) const
     if (!input) {
         useProjFormat = true;
     } else {
-        StatusEnum stat = input->getEffectInstance()->getRegionOfDefinition_public(input->getHashValue(), time, RenderScale(1.), ViewIdx(0), &ret, 0);
+        StatusEnum stat = input->getEffectInstance()->getRegionOfDefinition_public(input->getHashValue(), time, RenderScale::identity, ViewIdx(0), &ret, 0);
         if (stat == eStatusFailed) {
             useProjFormat = true;
         } else {

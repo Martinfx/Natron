@@ -39,7 +39,6 @@ fi
 
 # Setup env
 if [ "$PKGOS" = "Linux" ]; then
-    export BOOST_ROOT="$SDK_HOME"
     #export PYTHONHOME="$SDK_HOME"
     export LD_LIBRARY_PATH="$SDK_HOME/lib:$SDK_HOME/qt${QT_VERSION_MAJOR}/lib"
     export PATH="$SDK_HOME/gcc/bin:$SDK_HOME/bin:$SDK_HOME/qt${QT_VERSION_MAJOR}/bin:$HOME/.cabal/bin:$PATH"
@@ -50,20 +49,10 @@ if [ "$PKGOS" = "Linux" ]; then
     fi
     export C_INCLUDE_PATH="${SDK_HOME}/gcc/include:${SDK_HOME}/include:${SDK_HOME}/qt${QT_VERSION_MAJOR}/include"
     export CPLUS_INCLUDE_PATH="${C_INCLUDE_PATH}"
-# https://github.com/msys2/MINGW-packages/issues/10761
-# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70129
-#elif [ "$PKGOS" = "Windows" ]; then
-#    export C_INCLUDE_PATH="${SDK_HOME}/gcc/include:${SDK_HOME}/include:${SDK_HOME}/qt${QT_VERSION_MAJOR}/include"
-#    export CPLUS_INCLUDE_PATH="${C_INCLUDE_PATH}"
 fi
 QMAKE="$QTDIR/bin/qmake"
 
 cd "$TMP_PATH"
-
-# kill git if idle for too long
-#"$KILLSCRIPT" $PID &
-#KILLBOT=$! 
-
 
 # OpenColorIO-Configs setup
 OCIO_CONFIGS_VERSION=${OCIO_CONFIGS_VERSION:-}
@@ -79,7 +68,7 @@ fi
 
 if [ "$OCIO_CONFIGS_VERSION" = "" ]; then
     OCIO_CONFIGS_VERSION="3.0"
-    echo "Warnning: No OCIO config version found, setting to $OCIO_CONFIGS_VERSION"
+    echo "Warning: No OCIO config version found, setting to $OCIO_CONFIGS_VERSION"
 fi
 
 OCIO_CONFIGS_URL=https://github.com/NatronGitHub/OpenColorIO-Configs/archive/Natron-v${OCIO_CONFIGS_VERSION}.tar.gz
@@ -139,14 +128,6 @@ else
     cat "$INC_PATH/natron/${PKGOS}.pri" > config.pri
 fi
 
-if [ "$NO_BUILD" != "1" ] && ([ "${SDK_VERSION:-}" = "CY2016" ] || [ "${SDK_VERSION:-}" = "CY2017" ]); then
-    cat "$INC_PATH/natron/${SDK_VERSION}.pri" > config.pri
-    rm -f Engine/NatronEngine/* Gui/NatronGui/*
-    shiboken --avoid-protected-hack --enable-pyside-extensions --include-paths="../Engine:../Global:${SDK_HOME}/include:${SDK_HOME}/include/PySide2"  --typesystem-paths="${SDK_HOME}/share/PySide2/typesystems" --output-directory=Engine Engine/Pyside_Engine_Python.h  Engine/typesystem_engine.xml
-    shiboken --avoid-protected-hack --enable-pyside-extensions --include-paths="../Engine:../Gui:../Global:${SDK_HOME}/include:${SDK_HOME}/include/PySide2"  --typesystem-paths="${SDK_HOME}/share/PySide2/typesystems:Engine" --output-directory=Gui Gui/Pyside_Gui_Python.h  Gui/typesystem_natronGui.xml
-    sh tools/utils/runPostShiboken.sh
-fi
-
 echo "*** config.pri:"
 echo "========================================================================"
 cat config.pri
@@ -173,14 +154,14 @@ if [ "$QT_VERSION_MAJOR" = 5 ]; then
     esac
 
     rm Engine/Qt${QT_VERSION_MAJOR}/NatronEngine/* Gui/Qt${QT_VERSION_MAJOR}/NatronGui/* || true
-    SHIBOKEN_INCLUDE_PATHS=".:./Engine:./Global:libs/OpenFX/include:${UNIX_SDK_HOME}/include:${QTDIR}/include:${UNIX_PYTHON_HOME}/include/python${PYVER}:${UNIX_PYTHON_HOME}/include/PySide2:${UNIX_PYTHON_HOME}/lib/python${PYVER}/site-packages/PySide2/include"
-    SHIBOKEN_TYPESYSTEM_PATHS="${UNIX_PYTHON_HOME}/share/PySide2/typesystems:${UNIX_PYTHON_HOME}/lib/python${PYVER}/site-packages/PySide2/typesystems"
-    shiboken2 --avoid-protected-hack --enable-pyside-extensions --include-paths=${SHIBOKEN_INCLUDE_PATHS} --typesystem-paths=${SHIBOKEN_TYPESYSTEM_PATHS} --output-directory=Engine/Qt${QT_VERSION_MAJOR} Engine/Pyside2_Engine_Python.h  Engine/typesystem_engine.xml
+    SHIBOKEN_INCLUDE_PATHS="-I. -I./Engine -I./Global -Ilibs/OpenFX/include -I${UNIX_SDK_HOME}/include -I${QTDIR}/include -I${QTDIR}/include/QtCore -I${UNIX_PYTHON_HOME}/include/python${PYVER} -I${UNIX_PYTHON_HOME}/include/PySide2 -I${UNIX_PYTHON_HOME}/include/PySide2/QtCore -I${UNIX_PYTHON_HOME}/include/PySide2/QtGui -I${UNIX_PYTHON_HOME}/lib/python${PYVER}/site-packages/PySide2/include -I${UNIX_PYTHON_HOME}/lib/python${PYVER}/site-packages/PySide2/include/QtCore -I${UNIX_PYTHON_HOME}/lib/python${PYVER}/site-packages/PySide2/include/QtGui"
+    SHIBOKEN_TYPESYSTEM_PATHS="-T${UNIX_PYTHON_HOME}/share/PySide2/typesystems -T${UNIX_PYTHON_HOME}/lib/python${PYVER}/site-packages/PySide2/typesystems"
+    shiboken2 -std=c++17 --avoid-protected-hack --enable-pyside-extensions ${SHIBOKEN_INCLUDE_PATHS} ${SHIBOKEN_TYPESYSTEM_PATHS} --output-directory=Engine/Qt${QT_VERSION_MAJOR} Engine/Pyside2_Engine_Python.h  Engine/typesystem_engine.xml
 
-    shiboken2 --avoid-protected-hack --enable-pyside-extensions --include-paths=${SHIBOKEN_INCLUDE_PATHS}:${QTDIR}/include/QtWidgets:${QTDIR}/include/QtCore --typesystem-paths=${SHIBOKEN_TYPESYSTEM_PATHS}:./Engine:./Shiboken --output-directory=Gui/Qt${QT_VERSION_MAJOR} Gui/Pyside2_Gui_Python.h  Gui/typesystem_natronGui.xml
+    shiboken2 -std=c++17 --avoid-protected-hack --enable-pyside-extensions ${SHIBOKEN_INCLUDE_PATHS} -I${QTDIR}/include/QtWidgets -I${QTDIR}/include/QtGui -I${QTDIR}/include/QtCore  ${SHIBOKEN_TYPESYSTEM_PATHS} -T./Engine -T./Shiboken --output-directory=Gui/Qt${QT_VERSION_MAJOR} Gui/PySide2_Gui_Python.h  Gui/typesystem_natronGui.xml
 
-    tools/utils/runPostShiboken2.sh Engine/Qt${QT_VERSION_MAJOR}/NatronEngine natronengine
-    tools/utils/runPostShiboken2.sh Gui/Qt${QT_VERSION_MAJOR}/NatronGui natrongui
+    python3 tools/utils/sourceCleanup.py Engine/typesystem_engine.xml Engine/Qt${QT_VERSION_MAJOR}
+    python3 tools/utils/sourceCleanup.py Gui/typesystem_natronGui.xml Gui/Qt${QT_VERSION_MAJOR}
 
 fi
 
@@ -267,11 +248,7 @@ QMAKE_FLAGS_EXTRA+=(CONFIG+=enable-osmesa OSMESA_PATH="$OSMESA_PATH" LLVM_PATH="
 # mac compiler
 if [ "$PKGOS" = "OSX" ]; then
     if [ "$COMPILER" = "clang" ] || [ "$COMPILER" = "clang-omp" ]; then
-        if [ "${QT_VERSION_MAJOR}" = 4 ]; then
-            SPEC=unsupported/macx-clang
-        else
-            SPEC=macx-clang
-        fi
+        SPEC=macx-clang
     else
         SPEC=macx-g++
     fi
@@ -322,9 +299,9 @@ CRASHGUI="NatronCrashReporter"
 CRASHCLI="NatronRendererCrashReporter"
 if [ "$PKGOS" = "Windows" ]; then
     WIN_BIN_TYPE=release
-    #if [ "${COMPILE_TYPE}" = "debug" ]; then
-    #    WIN_BIN_TYPE=debug
-    #fi
+    if [ "${COMPILE_TYPE}" = "debug" ]; then
+       WIN_BIN_TYPE=debug
+    fi
     NATRON_CONVERTER="$WIN_BIN_TYPE/${NATRON_CONVERTER}.exe"
     NATRON_PYTHON_BIN="$WIN_BIN_TYPE/${NATRON_PYTHON_BIN}.exe"
     NATRON_TEST="$WIN_BIN_TYPE/${NATRON_TEST}.exe"

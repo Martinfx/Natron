@@ -28,13 +28,13 @@
 #include <bitset>
 #include <stdexcept>
 
-#include <QtCore/QCoreApplication>
+#include <QCoreApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QCheckBox>
 #include <QItemSelectionModel>
-#include <QtCore/QRegExp>
+#include <QRegExp>
 
 #include "Engine/Node.h"
 #include "Engine/Timer.h"
@@ -321,7 +321,7 @@ public:
                 item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
             }
             assert(item);
-            const std::set<unsigned int>& mm = stats.getMipMapLevelsRendered();
+            const std::set<unsigned int>& mm = stats.getMipmapLevelsRendered();
             for (std::set<unsigned int>::const_iterator it = mm.begin(); it != mm.end(); ++it) {
                 str.append( QString::number(*it) );
                 str.append( QLatin1Char(' ') );
@@ -900,12 +900,7 @@ RenderStatsDialog::RenderStatsDialog(Gui* gui)
     _imp->view->setSelectionMode(QAbstractItemView::SingleSelection);
     _imp->view->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    _imp->view->header()->setResizeMode(QHeaderView::ResizeToContents);
-#else
     _imp->view->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-#endif
     _imp->view->header()->setStretchLastSection(true);
     _imp->view->setUniformRowHeights(true);
     _imp->view->setSortingEnabled(true);

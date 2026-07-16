@@ -29,10 +29,11 @@
 #include "Global/Macros.h"
 
 #include "Node.h"
+#include "Timer.h" // gettimeofday()
 
-#include <QtCore/QWaitCondition>
-#include <QtCore/QReadWriteLock>
-#include <QtCore/QMutex>
+#include <QWaitCondition>
+#include <QReadWriteLock>
+#include <QMutex>
 
 #include "Engine/Hash64.h"
 
@@ -173,11 +174,7 @@ public:
         , mustQuitPreview(0)
         , mustQuitPreviewMutex()
         , mustQuitPreviewCond()
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         , renderInstancesSharedMutex()
-#else
-        , renderInstancesSharedMutex(QMutex::Recursive)
-#endif
         , knobsAge(0)
         , knobsAgeMutex()
         , masterNodeMutex()

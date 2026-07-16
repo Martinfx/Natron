@@ -35,9 +35,11 @@ CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
 #include <QFrame>
 #include <QTabBar>
-#include <QtCore/QMutex>
+#include <QMutex>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
+
+#include "Global/QtCompat.h"
 
 #include "Gui/GuiFwd.h"
 
@@ -189,9 +191,10 @@ public:
 
     void insertTab(int index, PanelWidget* widget, ScriptObject* object);
 
-    /*Removes from the TabWidget, but does not delete the widget.
-       Returns NULL if the index is not in a good range.*/
-    PanelWidget* removeTab(int index, bool userAction);
+    /*Removes from the TabWidget, but does not delete the widget if it is owned by C++ code. If
+      the widget was owned by Python code (e.g. a PyPanel), then the widget may get destroyed
+      if no other references exist in Python.*/
+    void removeTab(int index, bool userAction);
 
     /*Get the header name of the tab at index "index".*/
     QString getTabLabel(int index) const;
@@ -201,7 +204,9 @@ public:
 
     void setTabLabel(PanelWidget* tab, const QString & name);
 
-    /*Removes from the TabWidget, but does not delete the widget.*/
+    /*Removes from the TabWidget, but does not delete the widget if it is owned by C++ code. If
+      the widget was owned by Python code (e.g. a PyPanel), then the widget may get destroyed
+      if no other references exist in Python.*/
     void removeTab(PanelWidget* widget, bool userAction);
 
     int count() const;
@@ -349,7 +354,7 @@ private:
     virtual void keyPressEvent(QKeyEvent* e) OVERRIDE FINAL;
     virtual void mouseMoveEvent(QMouseEvent* e) OVERRIDE FINAL;
     virtual void leaveEvent(QEvent* e) OVERRIDE FINAL;
-    virtual void enterEvent(QEvent* e) OVERRIDE FINAL;
+    virtual void enterEvent(QtCompat::QEnterEvent* e) OVERRIDE FINAL;
 
 private:
 

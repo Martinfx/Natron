@@ -23,7 +23,7 @@
 #include <Python.h>
 // ***** END PYTHON BLOCK *****
 
-#include <QtCore/QtGlobal> // for Q_OS_*
+#include <QtGlobal> // for Q_OS_*
 #if defined(Q_OS_UNIX)
 #include <sys/time.h>     // for getrlimit on linux
 #include <sys/resource.h> // for getrlimit
@@ -36,7 +36,7 @@
 #include <cstdlib> // exit
 #include <iostream>
 
-#include <QtCore/QCoreApplication>
+#include <QCoreApplication>
 
 #ifdef DEBUG
 #include "Global/FloatingPointExceptions.h"
@@ -94,8 +94,9 @@ extern "C" {
 
     CLArgs args(argc, argv, true);
 
-    if (args.getError() > 0) {
-        return 1;
+    const auto error = args.getError();
+    if (error) {
+        return error.value();
     }
 
     AppManager manager;

@@ -33,8 +33,8 @@ CLANG_DIAG_OFF(uninitialized)
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSplitter>
-#include <QtCore/QTimer>
-#include <QtCore/QDebug>
+#include <QTimer>
+#include <QDebug>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
@@ -380,7 +380,7 @@ loadNodeGuiSerialization(Gui* gui,
             tab->setUserRoI(found->second.userRoI);
             tab->setClipToProject(found->second.isClippedToProject);
             tab->setRenderScaleActivated(found->second.renderScaleActivated);
-            tab->setMipMapLevel(found->second.mipMapLevel);
+            tab->setMipmapLevel(found->second.mipmapLevel);
             tab->setCompositingOperator( (ViewerCompositingOperatorEnum)found->second.wipeCompositingOp );
             tab->setZoomOrPannedSinceLastFit(found->second.zoomOrPanSinceLastFit);
             tab->setTopToolbarVisible(found->second.topToolbarVisible);

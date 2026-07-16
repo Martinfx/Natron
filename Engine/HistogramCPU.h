@@ -30,7 +30,7 @@
 
 #include <vector>
 
-#include <QtCore/QThread>
+#include <QThread>
 
 #include "Engine/EngineFwd.h"
 
@@ -75,7 +75,7 @@ public:
                                           unsigned int* binsCount,
                                           unsigned int* pixelsCount,
                                           int* mode,
-                                          double* vmin, double* vmax, unsigned int* mipMapLevel);
+                                          double* vmin, double* vmax, unsigned int* mipmapLevel);
 
     void quitAnyComputation();
 

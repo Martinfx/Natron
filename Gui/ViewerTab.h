@@ -30,6 +30,7 @@
 
 #include "Global/GlobalDefines.h"
 #include "Global/KeySymbols.h" // Key
+#include "Global/QtCompat.h"
 
 #include "Engine/RenderStats.h"
 #include "Engine/ViewIdx.h"
@@ -38,7 +39,7 @@
 #include "Gui/PanelWidget.h"
 #include "Gui/GuiFwd.h"
 
-#include <QtCore/QSize>
+#include <QSize>
 
 NATRON_NAMESPACE_ENTER
 
@@ -162,9 +163,9 @@ public:
 
     void setAutoContrastEnabled(bool b);
 
-    void setMipMapLevel(int level);
+    void setMipmapLevel(unsigned int level);
 
-    int getMipMapLevel() const;
+    unsigned int getMipmapLevel() const;
 
     void setRenderScaleActivated(bool act);
 
@@ -467,7 +468,7 @@ private:
     virtual bool eventFilter(QObject *target, QEvent* e) OVERRIDE FINAL;
     virtual void keyPressEvent(QKeyEvent* e) OVERRIDE FINAL;
     virtual void keyReleaseEvent(QKeyEvent* e) OVERRIDE FINAL;
-    virtual void enterEvent(QEvent* e) OVERRIDE FINAL;
+    virtual void enterEvent(QtCompat::QEnterEvent* e) OVERRIDE FINAL;
     virtual void leaveEvent(QEvent* e) OVERRIDE FINAL;
     virtual QSize minimumSizeHint() const OVERRIDE FINAL;
     virtual QSize sizeHint() const OVERRIDE FINAL;

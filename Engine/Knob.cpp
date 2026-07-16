@@ -32,12 +32,12 @@
 #include <sstream> // stringstream
 #include <cctype> // isspace
 
-#include <QtCore/QDataStream>
-#include <QtCore/QDateTime>
-#include <QtCore/QByteArray>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QThread>
-#include <QtCore/QDebug>
+#include <QDataStream>
+#include <QDateTime>
+#include <QByteArray>
+#include <QCoreApplication>
+#include <QThread>
+#include <QDebug>
 
 #include "Global/GlobalDefines.h"
 
@@ -2710,7 +2710,7 @@ KnobHelper::validateExpression(const std::string& expression,
                 if ( PyFloat_Check(ret) ) {
                     index = std::floor( (double)PyFloat_AsDouble(ret) + 0.5 );
                 } else if ( PyLong_Check(ret) ) {
-                    index = (int)PyInt_AsLong(ret);
+                    index = (int)PyLong_AsLong(ret);
                 } else if (PyObject_IsTrue(ret) == 1) {
                     index = 1;
                 }
@@ -4902,11 +4902,7 @@ struct KnobHolder::KnobHolderPrivate
         , isDequeingValuesSet(false)
         , paramsEditLevel(eMultipleParamsEditOff)
         , paramsEditRecursionLevel(0)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         , evaluationBlockedMutex()
-#else
-        , evaluationBlockedMutex(QMutex::Recursive)
-#endif
         , evaluationBlocked(0)
         , canCurrentlySetValue(true)
         , knobChanged()
@@ -4934,11 +4930,7 @@ struct KnobHolder::KnobHolderPrivate
     , isDequeingValuesSet(other.isDequeingValuesSet)
     , paramsEditLevel(other.paramsEditLevel)
     , paramsEditRecursionLevel(other.paramsEditRecursionLevel)
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     , evaluationBlockedMutex()
-#else
-    , evaluationBlockedMutex(QMutex::Recursive)
-#endif
     , evaluationBlocked(0)
     , canCurrentlySetValue(other.canCurrentlySetValue)
     , knobChanged()

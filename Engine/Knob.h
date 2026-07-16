@@ -33,13 +33,11 @@
 #include <set>
 #include <map>
 
-#include <QtCore/QReadWriteLock>
-#include <QtCore/QMutex>
-#include <QtCore/QString>
-#include <QtCore/QCoreApplication>
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-#include <QtCore/QRecursiveMutex>
-#endif
+#include <QReadWriteLock>
+#include <QMutex>
+#include <QString>
+#include <QCoreApplication>
+#include <QRecursiveMutex>
 
 #include "Engine/Variant.h"
 #include "Engine/AppManager.h" // for AppManager::createKnob
@@ -155,7 +153,7 @@ public:
         Q_EMIT setValueWithUndoStack(v, view, dim);
     }
 
-    void s_appendParamEditChange(NATRON_ENUM::ValueChangedReasonEnum reason,
+    void s_appendParamEditChange(Natron::ValueChangedReasonEnum reason,
                                  Variant v,
                                  ViewSpec view,
                                  int dim,
@@ -184,7 +182,7 @@ public:
         Q_EMIT keyFrameMoved(view, dimension, oldTime, newTime);
     }
 
-    void s_redrawGuiCurve(NATRON_ENUM::CurveChangeReason reason,
+    void s_redrawGuiCurve(Natron::CurveChangeReason reason,
                           ViewSpec view,
                           int dimension)
     {
@@ -356,7 +354,7 @@ Q_SIGNALS:
 struct KnobChange
 {
     KnobIPtr knob;
-    NATRON_ENUM::ValueChangedReasonEnum reason, originalReason;
+    Natron::ValueChangedReasonEnum reason, originalReason;
     bool originatedFromMainThread;
     bool refreshGui;
     double time;
@@ -487,7 +485,7 @@ public:
      * evaluate the new value (cause a render).
      * @returns true if the knobChanged handler was called once for this knob
      **/
-    virtual bool evaluateValueChange(int dimension, double time, ViewSpec view, NATRON_ENUM::ValueChangedReasonEnum reason) = 0;
+    virtual bool evaluateValueChange(int dimension, double time, ViewSpec view, Natron::ValueChangedReasonEnum reason) = 0;
 
     /**
      * @brief Copies all the values, animations and extra data the other knob might have
@@ -563,28 +561,28 @@ protected:
     /**
      * @brief Removes all the keyframes in the given dimension.
      **/
-    virtual void removeAnimationWithReason(ViewSpec view, int dimension, NATRON_ENUM::ValueChangedReasonEnum reason) = 0;
+    virtual void removeAnimationWithReason(ViewSpec view, int dimension, Natron::ValueChangedReasonEnum reason) = 0;
 
 public:
 
     /**
      * @brief Removes the keyframe at the given time and dimension if it matches any.
      **/
-    virtual void deleteValueAtTime(NATRON_ENUM::CurveChangeReason curveChangeReason, double time, ViewSpec view, int dimension, bool copyCurveValueAtTimeToInternalValue) = 0;
-    virtual void deleteValuesAtTime(NATRON_ENUM::CurveChangeReason curveChangeReason, const std::list<double>& times, ViewSpec view, int dimension, bool copyCurveValueAtTimeToInternalValue) = 0;
+    virtual void deleteValueAtTime(Natron::CurveChangeReason curveChangeReason, double time, ViewSpec view, int dimension, bool copyCurveValueAtTimeToInternalValue) = 0;
+    virtual void deleteValuesAtTime(Natron::CurveChangeReason curveChangeReason, const std::list<double>& times, ViewSpec view, int dimension, bool copyCurveValueAtTimeToInternalValue) = 0;
 
 
     /**
      * @brief Moves a keyframe by a given delta and emits the signal keyframeMoved
      **/
-    virtual bool moveValueAtTime(NATRON_ENUM::CurveChangeReason reason, double time, ViewSpec view,  int dimension, double dt, double dv, KeyFrame* newKey) = 0;
-    virtual bool moveValuesAtTime(NATRON_ENUM::CurveChangeReason reason, ViewSpec view,  int dimension, double dt, double dv, std::vector<KeyFrame>* keyframes) = 0;
+    virtual bool moveValueAtTime(Natron::CurveChangeReason reason, double time, ViewSpec view,  int dimension, double dt, double dv, KeyFrame* newKey) = 0;
+    virtual bool moveValuesAtTime(Natron::CurveChangeReason reason, ViewSpec view,  int dimension, double dt, double dv, std::vector<KeyFrame>* keyframes) = 0;
 
     /**
      * @brief Transforms a keyframe by a given matrix. The matrix must not contain any skew or rotation.
      **/
-    virtual bool transformValueAtTime(NATRON_ENUM::CurveChangeReason curveChangeReason, double time, ViewSpec view,  int dimension, const Transform::Matrix3x3& matrix, KeyFrame* newKey) = 0;
-    virtual bool transformValuesAtTime(NATRON_ENUM::CurveChangeReason curveChangeReason, ViewSpec view,  int dimension, const Transform::Matrix3x3& matrix, std::vector<KeyFrame>* keyframes) = 0;
+    virtual bool transformValueAtTime(Natron::CurveChangeReason curveChangeReason, double time, ViewSpec view,  int dimension, const Transform::Matrix3x3& matrix, KeyFrame* newKey) = 0;
+    virtual bool transformValuesAtTime(Natron::CurveChangeReason curveChangeReason, ViewSpec view,  int dimension, const Transform::Matrix3x3& matrix, std::vector<KeyFrame>* keyframes) = 0;
 
     /**
      * @brief Copies all the animation of *curve* into the animation curve at the given dimension.
@@ -594,25 +592,25 @@ public:
     /**
      * @brief Changes the interpolation type for the given keyframe
      **/
-    virtual bool setInterpolationAtTime(NATRON_ENUM::CurveChangeReason reason, ViewSpec view, int dimension, double time, NATRON_ENUM::KeyframeTypeEnum interpolation, KeyFrame* newKey) = 0;
+    virtual bool setInterpolationAtTime(Natron::CurveChangeReason reason, ViewSpec view, int dimension, double time, Natron::KeyframeTypeEnum interpolation, KeyFrame* newKey) = 0;
 
     /**
      * @brief Set the left/right derivatives of the control point at the given time.
      **/
-    virtual bool moveDerivativesAtTime(NATRON_ENUM::CurveChangeReason reason, ViewSpec view, int dimension, double time, double left, double right) = 0;
-    virtual bool moveDerivativeAtTime(NATRON_ENUM::CurveChangeReason reason, ViewSpec view, int dimension, double time, double derivative, bool isLeft) = 0;
+    virtual bool moveDerivativesAtTime(Natron::CurveChangeReason reason, ViewSpec view, int dimension, double time, double left, double right) = 0;
+    virtual bool moveDerivativeAtTime(Natron::CurveChangeReason reason, ViewSpec view, int dimension, double time, double derivative, bool isLeft) = 0;
 
     /**
      * @brief Removes animation before the given time and dimension. If the reason is different than eValueChangedReasonUserEdited
      * a signal will be emitted
      **/
-    virtual void deleteAnimationBeforeTime(double time, ViewSpec view, int dimension, NATRON_ENUM::ValueChangedReasonEnum reason) = 0;
+    virtual void deleteAnimationBeforeTime(double time, ViewSpec view, int dimension, Natron::ValueChangedReasonEnum reason) = 0;
 
     /**
      * @brief Removes animation before the given time and dimension. If the reason is different than eValueChangedReasonUserEdited
      * a signal will be emitted
      **/
-    virtual void deleteAnimationAfterTime(double time, ViewSpec view, int dimension, NATRON_ENUM::ValueChangedReasonEnum reason) = 0;
+    virtual void deleteAnimationAfterTime(double time, ViewSpec view, int dimension, Natron::ValueChangedReasonEnum reason) = 0;
 
     /**
      * @brief Calls removeAnimation with a reason of eValueChangedReasonNatronInternalEdited.
@@ -691,7 +689,7 @@ public:
 
 protected:
 
-    virtual void refreshListenersAfterValueChange(ViewSpec view, NATRON_ENUM::ValueChangedReasonEnum reason, int dimension) = 0;
+    virtual void refreshListenersAfterValueChange(ViewSpec view, Natron::ValueChangedReasonEnum reason, int dimension) = 0;
 
 public:
 
@@ -712,7 +710,7 @@ public:
      **/
     virtual bool onKeyFrameSet(double time, ViewSpec view, int dimension) = 0;
     virtual bool onKeyFrameSet(double time, ViewSpec view, const KeyFrame& key, int dimension) = 0;
-    virtual bool setKeyFrame(const KeyFrame& key, ViewSpec view,  int dimension, NATRON_ENUM::ValueChangedReasonEnum reason) = 0;
+    virtual bool setKeyFrame(const KeyFrame& key, ViewSpec view,  int dimension, Natron::ValueChangedReasonEnum reason) = 0;
 
     /**
      * @brief Called when the current time of the timeline changes.
@@ -1069,7 +1067,6 @@ public:
     virtual double getScreenPixelRatio() const OVERRIDE = 0;
 #endif
     virtual void getBackgroundColour(double &r, double &g, double &b) const OVERRIDE = 0;
-    virtual unsigned int getCurrentRenderScale() const OVERRIDE FINAL { return 0; }
 
     virtual RectD getViewportRect() const OVERRIDE = 0;
     virtual void getCursorPosition(double& x, double& y) const OVERRIDE = 0;
@@ -1166,14 +1163,14 @@ protected:
      * at the same dimension for the knob 'other'.
      * In case of success, this function returns true, otherwise false.
      **/
-    virtual bool slaveToInternal(int dimension, const KnobIPtr &  other, int otherDimension, NATRON_ENUM::ValueChangedReasonEnum reason,
+    virtual bool slaveToInternal(int dimension, const KnobIPtr &  other, int otherDimension, Natron::ValueChangedReasonEnum reason,
                                  bool ignoreMasterPersistence) = 0;
 
     /**
      * @brief Unslaves a previously slaved dimension. The implementation should assert that
      * the dimension was really slaved.
      **/
-    virtual void unSlaveInternal(int dimension, NATRON_ENUM::ValueChangedReasonEnum reason, bool copyState) = 0;
+    virtual void unSlaveInternal(int dimension, Natron::ValueChangedReasonEnum reason, bool copyState) = 0;
 
 public:
 
@@ -1282,7 +1279,7 @@ public:
     /**
      * @brief Get the current animation level.
      **/
-    virtual NATRON_ENUM::AnimationLevelEnum getAnimationLevel(int dimension) const = 0;
+    virtual Natron::AnimationLevelEnum getAnimationLevel(int dimension) const = 0;
 
     /**
      * @brief Restores the default value
@@ -1392,15 +1389,15 @@ public:
     virtual void blockListenersNotification() OVERRIDE FINAL;
     virtual void unblockListenersNotification() OVERRIDE FINAL;
     virtual bool isListenersNotificationBlocked() const OVERRIDE FINAL WARN_UNUSED_RETURN;
-    virtual bool evaluateValueChange(int dimension, double time, ViewSpec view,  NATRON_ENUM::ValueChangedReasonEnum reason) OVERRIDE FINAL;
+    virtual bool evaluateValueChange(int dimension, double time, ViewSpec view,  Natron::ValueChangedReasonEnum reason) OVERRIDE FINAL;
 
 protected:
     // Returns true if the knobChanged handler was called
     bool evaluateValueChangeInternal(int dimension,
                                      double time,
                                      ViewSpec view,
-                                     NATRON_ENUM::ValueChangedReasonEnum reason,
-                                     NATRON_ENUM::ValueChangedReasonEnum originalReason);
+                                     Natron::ValueChangedReasonEnum reason,
+                                     Natron::ValueChangedReasonEnum originalReason);
 
     virtual void onInternalValueChanged(int /*dimension*/,
                                         double /*time*/,
@@ -1429,15 +1426,15 @@ protected:
 private:
 
 
-    virtual void removeAnimationWithReason(ViewSpec view, int dimension, NATRON_ENUM::ValueChangedReasonEnum reason) OVERRIDE FINAL;
-    virtual void deleteValueAtTime(NATRON_ENUM::CurveChangeReason curveChangeReason, double time, ViewSpec view,  int dimension,bool copyCurveValueAtTimeToInternalValue) OVERRIDE FINAL;
-    virtual void deleteValuesAtTime(NATRON_ENUM::CurveChangeReason curveChangeReason, const std::list<double>& times, ViewSpec view, int dimension, bool copyCurveValueAtTimeToInternalValue) OVERRIDE FINAL;
+    virtual void removeAnimationWithReason(ViewSpec view, int dimension, Natron::ValueChangedReasonEnum reason) OVERRIDE FINAL;
+    virtual void deleteValueAtTime(Natron::CurveChangeReason curveChangeReason, double time, ViewSpec view,  int dimension,bool copyCurveValueAtTimeToInternalValue) OVERRIDE FINAL;
+    virtual void deleteValuesAtTime(Natron::CurveChangeReason curveChangeReason, const std::list<double>& times, ViewSpec view, int dimension, bool copyCurveValueAtTimeToInternalValue) OVERRIDE FINAL;
 
 public:
 
     virtual void onKeyFrameRemoved(double time, ViewSpec view, int dimension, bool copyCurveValueAtTimeToInternalValue) OVERRIDE FINAL;
-    virtual bool moveValueAtTime(NATRON_ENUM::CurveChangeReason reason, double time, ViewSpec view, int dimension, double dt, double dv, KeyFrame* newKey) OVERRIDE FINAL;
-    virtual bool moveValuesAtTime(NATRON_ENUM::CurveChangeReason reason, ViewSpec view,  int dimension, double dt, double dv, std::vector<KeyFrame>* keyframes) OVERRIDE FINAL;
+    virtual bool moveValueAtTime(Natron::CurveChangeReason reason, double time, ViewSpec view, int dimension, double dt, double dv, KeyFrame* newKey) OVERRIDE FINAL;
+    virtual bool moveValuesAtTime(Natron::CurveChangeReason reason, ViewSpec view,  int dimension, double dt, double dv, std::vector<KeyFrame>* keyframes) OVERRIDE FINAL;
 
 private:
     bool moveValueAtTimeInternal(bool useGuiCurve, double time, ViewSpec view, int dimension, double dt, double dv, KeyFrame* newKey);
@@ -1445,8 +1442,8 @@ private:
 public:
 
 
-    virtual bool transformValueAtTime(NATRON_ENUM::CurveChangeReason curveChangeReason, double time, ViewSpec view, int dimension, const Transform::Matrix3x3& matrix, KeyFrame* newKey) OVERRIDE FINAL;
-    virtual bool transformValuesAtTime(NATRON_ENUM::CurveChangeReason curveChangeReason, ViewSpec view,  int dimension, const Transform::Matrix3x3& matrix, std::vector<KeyFrame>* keyframes) OVERRIDE FINAL;
+    virtual bool transformValueAtTime(Natron::CurveChangeReason curveChangeReason, double time, ViewSpec view, int dimension, const Transform::Matrix3x3& matrix, KeyFrame* newKey) OVERRIDE FINAL;
+    virtual bool transformValuesAtTime(Natron::CurveChangeReason curveChangeReason, ViewSpec view,  int dimension, const Transform::Matrix3x3& matrix, std::vector<KeyFrame>* keyframes) OVERRIDE FINAL;
 
 private:
     bool transformValueAtTimeInternal(bool useGuiCurve, double time, ViewSpec view, int dimension, const Transform::Matrix3x3& matrix, KeyFrame* newKey);
@@ -1454,15 +1451,15 @@ private:
 public:
 
     virtual void cloneCurve(ViewSpec view, int dimension, const Curve& curve) OVERRIDE FINAL;
-    virtual bool setInterpolationAtTime(NATRON_ENUM::CurveChangeReason reason, ViewSpec view, int dimension, double time, NATRON_ENUM::KeyframeTypeEnum interpolation, KeyFrame* newKey) OVERRIDE FINAL;
-    virtual bool moveDerivativesAtTime(NATRON_ENUM::CurveChangeReason reason, ViewSpec view, int dimension, double time, double left, double right)  OVERRIDE FINAL WARN_UNUSED_RETURN;
-    virtual bool moveDerivativeAtTime(NATRON_ENUM::CurveChangeReason reason, ViewSpec view, int dimension, double time, double derivative, bool isLeft) OVERRIDE FINAL WARN_UNUSED_RETURN;
-    virtual void deleteAnimationBeforeTime(double time, ViewSpec view, int dimension, NATRON_ENUM::ValueChangedReasonEnum reason) OVERRIDE FINAL;
-    virtual void deleteAnimationAfterTime(double time, ViewSpec view, int dimension, NATRON_ENUM::ValueChangedReasonEnum reason) OVERRIDE FINAL;
+    virtual bool setInterpolationAtTime(Natron::CurveChangeReason reason, ViewSpec view, int dimension, double time, Natron::KeyframeTypeEnum interpolation, KeyFrame* newKey) OVERRIDE FINAL;
+    virtual bool moveDerivativesAtTime(Natron::CurveChangeReason reason, ViewSpec view, int dimension, double time, double left, double right)  OVERRIDE FINAL WARN_UNUSED_RETURN;
+    virtual bool moveDerivativeAtTime(Natron::CurveChangeReason reason, ViewSpec view, int dimension, double time, double derivative, bool isLeft) OVERRIDE FINAL WARN_UNUSED_RETURN;
+    virtual void deleteAnimationBeforeTime(double time, ViewSpec view, int dimension, Natron::ValueChangedReasonEnum reason) OVERRIDE FINAL;
+    virtual void deleteAnimationAfterTime(double time, ViewSpec view, int dimension, Natron::ValueChangedReasonEnum reason) OVERRIDE FINAL;
 
 private:
 
-    void deleteAnimationConditional(double time, ViewSpec view, int dimension, NATRON_ENUM::ValueChangedReasonEnum reason, bool before);
+    void deleteAnimationConditional(double time, ViewSpec view, int dimension, Natron::ValueChangedReasonEnum reason, bool before);
 
 public:
 
@@ -1497,7 +1494,7 @@ protected:
     template <typename T>
     static T pyObjectToType(PyObject* o);
 
-    virtual void refreshListenersAfterValueChange(ViewSpec view, NATRON_ENUM::ValueChangedReasonEnum reason, int dimension) OVERRIDE FINAL;
+    virtual void refreshListenersAfterValueChange(ViewSpec view, Natron::ValueChangedReasonEnum reason, int dimension) OVERRIDE FINAL;
 
 public:
 
@@ -1615,7 +1612,7 @@ public:
 private:
 
 
-    virtual bool slaveToInternal(int dimension, const KnobIPtr &  other, int otherDimension, NATRON_ENUM::ValueChangedReasonEnum reason
+    virtual bool slaveToInternal(int dimension, const KnobIPtr &  other, int otherDimension, Natron::ValueChangedReasonEnum reason
                                  , bool ignoreMasterPersistence) OVERRIDE FINAL WARN_UNUSED_RETURN;
 
 protected:
@@ -1641,7 +1638,7 @@ public:
 
     virtual std::pair<int, KnobIPtr> getMaster(int dimension) const OVERRIDE FINAL WARN_UNUSED_RETURN;
     virtual bool isSlave(int dimension) const OVERRIDE FINAL WARN_UNUSED_RETURN;
-    virtual NATRON_ENUM::AnimationLevelEnum getAnimationLevel(int dimension) const OVERRIDE FINAL WARN_UNUSED_RETURN;
+    virtual Natron::AnimationLevelEnum getAnimationLevel(int dimension) const OVERRIDE FINAL WARN_UNUSED_RETURN;
     virtual bool isTypeCompatible(const KnobIPtr & other) const OVERRIDE WARN_UNUSED_RETURN = 0;
 
     /**
@@ -1751,19 +1748,19 @@ protected:
     {
     }
 
-    void cloneGuiCurvesIfNeeded(std::map<int, NATRON_ENUM::ValueChangedReasonEnum>& modifiedDimensions);
+    void cloneGuiCurvesIfNeeded(std::map<int, Natron::ValueChangedReasonEnum>& modifiedDimensions);
 
-    void cloneInternalCurvesIfNeeded(std::map<int, NATRON_ENUM::ValueChangedReasonEnum>& modifiedDimensions);
+    void cloneInternalCurvesIfNeeded(std::map<int, Natron::ValueChangedReasonEnum>& modifiedDimensions);
 
     void setInternalCurveHasChanged(ViewSpec view, int dimension, bool changed);
 
-    void guiCurveCloneInternalCurve(NATRON_ENUM::CurveChangeReason curveChangeReason, ViewSpec view, int dimension, NATRON_ENUM::ValueChangedReasonEnum reason);
+    void guiCurveCloneInternalCurve(Natron::CurveChangeReason curveChangeReason, ViewSpec view, int dimension, Natron::ValueChangedReasonEnum reason);
 
     virtual std::shared_ptr<Curve> getGuiCurve(ViewSpec view, int dimension, bool byPassMaster = false) const OVERRIDE FINAL;
 
     void setGuiCurveHasChanged(ViewSpec view, int dimension, bool changed);
     bool hasGuiCurveChanged(ViewSpec view, int dimension) const;
-    void clearExpressionsResultsIfNeeded(std::map<int, NATRON_ENUM::ValueChangedReasonEnum>& modifiedDimensions);
+    void clearExpressionsResultsIfNeeded(std::map<int, Natron::ValueChangedReasonEnum>& modifiedDimensions);
 
 
     std::shared_ptr<KnobSignalSlotHandler> _signalSlotHandler;
@@ -1845,7 +1842,7 @@ private:
 
 
     virtual void unSlaveInternal(int dimension,
-                                 NATRON_ENUM::ValueChangedReasonEnum reason,
+                                 Natron::ValueChangedReasonEnum reason,
                                  bool copyState) OVERRIDE FINAL;
 
 public:
@@ -1860,11 +1857,11 @@ public:
                                               const T & v,
                                               ViewSpec view,
                                               int dimension,
-                                              NATRON_ENUM::ValueChangedReasonEnum reason,
+                                              Natron::ValueChangedReasonEnum reason,
                                               KeyFrame* newKey,
                                               bool hasChanged = false); //!< set to true if any previous dimension of the same knob have changed
 
-    virtual bool setKeyFrame(const KeyFrame& key, ViewSpec view, int dimension, NATRON_ENUM::ValueChangedReasonEnum reason) OVERRIDE FINAL;
+    virtual bool setKeyFrame(const KeyFrame& key, ViewSpec view, int dimension, Natron::ValueChangedReasonEnum reason) OVERRIDE FINAL;
 
     /**
      * @brief Set the value of the knob in the given dimension with the given reason.
@@ -1874,7 +1871,7 @@ public:
     ValueChangedReturnCodeEnum setValue(const T & v,
                                         ViewSpec view,
                                         int dimension,
-                                        NATRON_ENUM::ValueChangedReasonEnum reason,
+                                        Natron::ValueChangedReasonEnum reason,
                                         KeyFrame* newKey,
                                         bool hasChanged = false); //!< set to true if any previous dimension of the same knob have changed
 
@@ -1892,25 +1889,25 @@ public:
     void setValues(const T& value0,
                    const T& value1,
                    ViewSpec view,
-                   NATRON_ENUM::ValueChangedReasonEnum reason);
+                   Natron::ValueChangedReasonEnum reason);
 
     void setValues(const T& value0,
                    const T& value1,
                    ViewSpec view,
-                   NATRON_ENUM::ValueChangedReasonEnum reason,
+                   Natron::ValueChangedReasonEnum reason,
                    int dimensionOffset);
 
     void setValues(const T& value0,
                    const T& value1,
                    const T& value2,
                    ViewSpec view,
-                   NATRON_ENUM::ValueChangedReasonEnum reason);
+                   Natron::ValueChangedReasonEnum reason);
 
     void setValues(const T& value0,
                    const T& value1,
                    const T& value2,
                    ViewSpec view,
-                   NATRON_ENUM::ValueChangedReasonEnum reason,
+                   Natron::ValueChangedReasonEnum reason,
                    int dimensionOffset);
 
 
@@ -1919,7 +1916,7 @@ public:
                    const T& value2,
                    const T& value3,
                    ViewSpec view,
-                   NATRON_ENUM::ValueChangedReasonEnum reason);
+                   Natron::ValueChangedReasonEnum reason);
 
     /**
      * @brief Calls setValue
@@ -1931,7 +1928,7 @@ public:
     ValueChangedReturnCodeEnum onValueChanged(const T & v,
                                               ViewSpec view,
                                               int dimension,
-                                              NATRON_ENUM::ValueChangedReasonEnum reason,
+                                              Natron::ValueChangedReasonEnum reason,
                                               KeyFrame* newKey);
 
     /**
@@ -1941,12 +1938,6 @@ public:
                                                   ViewSpec view,
                                                   int dimension);
 
-    /**
-     * @brief This is called by the plugin when a set value call would happen during  an interact action.
-     **/
-    void requestSetValueOnUndoStack(const T & value,
-                                    ViewSpec view,
-                                    int dimension);
 
     /**
      * @brief Calls setValueAtTime with a reason of eValueChangedReasonNatronInternalEdited.
@@ -1968,13 +1959,13 @@ public:
                          const T& value0,
                          const T& value1,
                          ViewSpec view,
-                         NATRON_ENUM::ValueChangedReasonEnum reason);
+                         Natron::ValueChangedReasonEnum reason);
 
     void setValuesAtTime(double time,
                          const T& value0,
                          const T& value1,
                          ViewSpec view,
-                         NATRON_ENUM::ValueChangedReasonEnum reason,
+                         Natron::ValueChangedReasonEnum reason,
                          int dimensionOffset);
 
     void setValuesAtTime(double time,
@@ -1982,14 +1973,14 @@ public:
                          const T& value1,
                          const T& value2,
                          ViewSpec view,
-                         NATRON_ENUM::ValueChangedReasonEnum reason);
+                         Natron::ValueChangedReasonEnum reason);
 
     void setValuesAtTime(double time,
                          const T& value0,
                          const T& value1,
                          const T& value2,
                          ViewSpec view,
-                         NATRON_ENUM::ValueChangedReasonEnum reason,
+                         Natron::ValueChangedReasonEnum reason,
                          int dimensionOffset);
 
     void setValuesAtTime(double time,
@@ -1998,7 +1989,7 @@ public:
                          const T& value2,
                          const T& value3,
                          ViewSpec view,
-                         NATRON_ENUM::ValueChangedReasonEnum reason);
+                         Natron::ValueChangedReasonEnum reason);
 
     /**
      * @brief Unlike getValueAtTime this function doesn't interpolate the values.
@@ -2150,8 +2141,6 @@ private:
 
     void makeKeyFrame(Curve* curve, double time, ViewSpec view, const T& v, KeyFrame* key);
 
-    void queueSetValue(const T& v, ViewSpec view, int dimension);
-
     virtual void clearExpressionsResults(int dimension) OVERRIDE FINAL
     {
         QMutexLocker k(&_valueMutex);
@@ -2191,7 +2180,7 @@ public:
                        const T& value,
                        const KeyFrame& key,
                        bool useKey,
-                       NATRON_ENUM::ValueChangedReasonEnum reason,
+                       Natron::ValueChangedReasonEnum reason,
                        bool valueChangesBlocked);
 
         virtual bool isSetValueAtTime() const { return false; }
@@ -2207,7 +2196,7 @@ public:
 
         bool useKey() const;
 
-        NATRON_ENUM::ValueChangedReasonEnum reason() const;
+        Natron::ValueChangedReasonEnum reason() const;
 
         bool valueChangesBlocked() const;
 
@@ -2226,7 +2215,7 @@ public:
                              int dimension,
                              const T& value,
                              const KeyFrame& key,
-                             NATRON_ENUM::ValueChangedReasonEnum reason,
+                             Natron::ValueChangedReasonEnum reason,
                              bool valueChangesBlocked)
             : QueuedSetValue(view, dimension, value, key, true, reason, valueChangesBlocked)
             , _time(time)
@@ -2246,11 +2235,8 @@ private:
     typedef std::shared_ptr<QueuedSetValueAtTime> QueuedSetValueAtTimePtr;
 
     ///Here is all the stuff we couldn't get rid of the template parameter
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     mutable QRecursiveMutex _valueMutex;
-#else
-    mutable QMutex _valueMutex; //< protects _values & _guiValues & _defaultValues & ExprResults
-#endif
+
     std::vector<T> _values, _guiValues;
 
     struct DefaultValue
@@ -2264,19 +2250,13 @@ private:
     //Only for double and int
     mutable QReadWriteLock _minMaxMutex;
     std::vector<T>  _minimums, _maximums, _displayMins, _displayMaxs;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     mutable QRecursiveMutex _setValuesQueueMutex;
-#else
-    mutable QMutex _setValuesQueueMutex;
-#endif
+
     std::list<std::shared_ptr<QueuedSetValue> > _setValuesQueue;
 
     ///this flag is to avoid recursive setValue calls
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     mutable QRecursiveMutex _setValueRecursionLevelMutex;
-#else
-    mutable QMutex _setValueRecursionLevelMutex;
-#endif
+
     int _setValueRecursionLevel;
 };
 
@@ -2564,8 +2544,8 @@ public:
                            bool refreshGui,
                            double time,
                            ViewSpec view,
-                           NATRON_ENUM::ValueChangedReasonEnum originalReason,
-                           NATRON_ENUM::ValueChangedReasonEnum reason);
+                           Natron::ValueChangedReasonEnum originalReason,
+                           Natron::ValueChangedReasonEnum reason);
 
     bool isSetValueCurrentlyPossible() const;
 
@@ -2630,14 +2610,14 @@ public:
      * You should NEVER CALL THIS YOURSELF as it would break the bracketing system.
      * You can overload this to prepare yourself to a lot of value changes.
      **/
-    void beginKnobsValuesChanged_public(NATRON_ENUM::ValueChangedReasonEnum reason);
+    void beginKnobsValuesChanged_public(Natron::ValueChangedReasonEnum reason);
 
     /**
      * @brief The virtual portion of notifyProjectEndKnobsValuesChanged(). This is called by the project
      * You should NEVER CALL THIS YOURSELF as it would break the bracketing system.
      * You can overload this to finish a serie of value changes, thus limiting the amount of changes to do.
      **/
-    void endKnobsValuesChanged_public(NATRON_ENUM::ValueChangedReasonEnum reason);
+    void endKnobsValuesChanged_public(Natron::ValueChangedReasonEnum reason);
 
 
     /**
@@ -2646,7 +2626,7 @@ public:
      * You can overload this to do things when a value is changed. Bear in mind that you can compress
      * the change by using the begin/end[ValueChanges] to optimize the changes.
      **/
-    virtual bool onKnobValueChanged_public(KnobI* k, NATRON_ENUM::ValueChangedReasonEnum reason, double time, ViewSpec view,
+    virtual bool onKnobValueChanged_public(KnobI* k, Natron::ValueChangedReasonEnum reason, double time, ViewSpec view,
                                            bool originatedFromMainThread);
 
 
@@ -2728,7 +2708,7 @@ protected:
      * You should NEVER CALL THIS YOURSELF as it would break the bracketing system.
      * You can overload this to prepare yourself to a lot of value changes.
      **/
-    virtual void beginKnobsValuesChanged(NATRON_ENUM::ValueChangedReasonEnum reason)
+    virtual void beginKnobsValuesChanged(Natron::ValueChangedReasonEnum reason)
     {
         Q_UNUSED(reason);
     }
@@ -2738,7 +2718,7 @@ protected:
      * You should NEVER CALL THIS YOURSELF as it would break the bracketing system.
      * You can overload this to finish a serie of value changes, thus limiting the amount of changes to do.
      **/
-    virtual void endKnobsValuesChanged(NATRON_ENUM::ValueChangedReasonEnum reason)
+    virtual void endKnobsValuesChanged(Natron::ValueChangedReasonEnum reason)
     {
         Q_UNUSED(reason);
     }
@@ -2750,7 +2730,7 @@ protected:
      * the change by using the begin/end[ValueChanges] to optimize the changes.
      **/
     virtual bool onKnobValueChanged(KnobI* /*k*/,
-                                    NATRON_ENUM::ValueChangedReasonEnum /*reason*/,
+                                    Natron::ValueChangedReasonEnum /*reason*/,
                                     double /*time*/,
                                     ViewSpec /*view*/,
                                     bool /*originatedFromMainThread*/)

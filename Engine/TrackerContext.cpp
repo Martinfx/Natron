@@ -31,9 +31,9 @@
 
 CLANG_DIAG_OFF(deprecated)
 CLANG_DIAG_OFF(uninitialized)
-#include <QtCore/QWaitCondition>
-#include <QtCore/QThread>
-#include <QtCore/QCoreApplication>
+#include <QWaitCondition>
+#include <QThread>
+#include <QCoreApplication>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
@@ -46,6 +46,7 @@ CLANG_DIAG_ON(uninitialized)
 #include "Engine/KnobTypes.h"
 #include "Engine/Project.h"
 #include "Engine/Curve.h"
+#include "Engine/Timer.h" // gettimeofday()
 #include "Engine/TLSHolder.h"
 #include "Engine/Transform.h"
 #include "Engine/TrackMarker.h"

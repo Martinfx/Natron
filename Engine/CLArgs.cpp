@@ -31,10 +31,14 @@
 #include <cassert>
 #include <stdexcept>
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QDebug>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
+#ifdef __NATRON_WIN32__
+#include <shellapi.h>  // CommandLineToArgvW
+#endif
+
+#include <QCoreApplication>
+#include <QDebug>
+#include <QFile>
+#include <QFileInfo>
 
 #include "Global/GlobalDefines.h"
 #include "Global/GitVersion.h"
@@ -65,7 +69,7 @@ public:
     bool clearCacheOnLaunch;
     bool clearOpenFXCacheOnLaunch;
     QString ipcPipe;
-    int error;
+    std::optional<int> error;
     bool isInterpreterMode;
     std::list<std::pair<int, std::pair<int, int> > > frameRanges;
     bool rangeSet;
@@ -95,7 +99,6 @@ public:
         , clearCacheOnLaunch(false)
         , clearOpenFXCacheOnLaunch(false)
         , ipcPipe()
-        , error(0)
         , isInterpreterMode(false)
         , frameRanges()
         , rangeSet(false)
@@ -441,7 +444,7 @@ CLArgs::printUsage(const std::string& programName)
     std::cout << msg.toStdString() << std::endl;
 } // CLArgs::printUsage
 
-int
+const std::optional<int>&
 CLArgs::getError() const
 {
     return _imp->error;
@@ -791,7 +794,7 @@ CLArgsPrivate::parse()
             msg += tr(" built on %1").arg( QString::fromUtf8(__DATE__) );
 #         endif
             std::cout << msg.toStdString() << std::endl;
-            error = 1;
+            error = 0;
 
             return;
         }
@@ -803,7 +806,7 @@ CLArgsPrivate::parse()
             it = args.erase(it);
 
             CLArgs::printUsage( executable.toStdString() );
-            error = 1;
+            error = 0;
 
             return;
         }

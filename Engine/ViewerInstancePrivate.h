@@ -37,11 +37,11 @@
 #include <cassert>
 #include <algorithm> // min, max
 
-#include <QtCore/QMutex>
-#include <QtCore/QWaitCondition>
-#include <QtCore/QReadWriteLock>
-#include <QtCore/QThread>
-#include <QtCore/QCoreApplication>
+#include <QMutex>
+#include <QWaitCondition>
+#include <QReadWriteLock>
+#include <QThread>
+#include <QCoreApplication>
 
 #include "Engine/AbortableRenderInfo.h"
 #include "Engine/OutputSchedulerThread.h"
@@ -140,7 +140,7 @@ public:
         , viewerParamsLayer( ImagePlaneDesc::getRGBAComponents() )
         , viewerParamsAlphaLayer( ImagePlaneDesc::getRGBAComponents() )
         , viewerParamsAlphaChannelName("a")
-        , viewerMipMapLevel(0)
+        , viewerMipmapLevel(0)
         , fullFrameProcessingEnabled(false)
         , activateInputChangedFromViewer(false)
         , gammaLookupMutex()
@@ -387,7 +387,7 @@ public:
     ImagePlaneDesc viewerParamsLayer;
     ImagePlaneDesc viewerParamsAlphaLayer;
     std::string viewerParamsAlphaChannelName;
-    unsigned int viewerMipMapLevel; //< the mipmap level the viewer should render at (0 == no downscaling)
+    unsigned int viewerMipmapLevel; //< the mipmap level the viewer should render at (0 == no downscaling)
     bool fullFrameProcessingEnabled;
 
     ///Only accessed from MT

@@ -25,7 +25,7 @@
 
 #include "AppManagerPrivate.h"
 
-#include <QtCore/QtGlobal> // for Q_OS_*
+#include <QtGlobal> // for Q_OS_*
 #if defined(Q_OS_UNIX)
 #include <sys/time.h>     // for getrlimit on linux
 #include <sys/resource.h> // for getrlimit
@@ -48,12 +48,12 @@ GCC_DIAG_UNUSED_LOCAL_TYPEDEFS_ON
 GCC_DIAG_ON(unused-parameter)
 // clang-format on
 
-#include <QtCore/QDebug>
-#include <QtCore/QProcess>
-#include <QtCore/QTemporaryFile>
-#include <QtCore/QCoreApplication>
-#include <QtNetwork/QLocalServer>
-#include <QtNetwork/QLocalSocket>
+#include <QDebug>
+#include <QProcess>
+#include <QTemporaryFile>
+#include <QCoreApplication>
+#include <QLocalServer>
+#include <QLocalSocket>
 
 #include "Global/QtCompat.h" // for removeRecursively
 #include "Global/GlobalDefines.h"
@@ -83,18 +83,11 @@ GCC_DIAG_ON(unused-parameter)
 BOOST_CLASS_EXPORT(NATRON_NAMESPACE::FrameParams)
 BOOST_CLASS_EXPORT(NATRON_NAMESPACE::ImageParams)
 
-#if PY_MAJOR_VERSION >= 3
-// Python 3
-
 //Borrowed from https://github.com/python/cpython/blob/634cb7aa2936a09e84c5787d311291f0e042dba3/Python/fileutils.c
 //Somehow Python 3 dev forced every C application embedding python to have their own code to convert char** to wchar_t**
 static wchar_t*
 char2wchar(const char* arg)
 {
-#if PY_MAJOR_VERSION > 3 || PY_MAJOR_MINOR >= 7
-    // https://docs.python.org/3/c-api/sys.html#c.Py_DecodeLocale
-    return Py_DecodeLocale(arg, NULL);
-#else // PY_VERSION < 3.7
     wchar_t *res = NULL;
 
 #ifdef HAVE_BROKEN_MBSTOWCS
@@ -203,7 +196,6 @@ char2wchar(const char* arg)
     }
     *out = 0;
 #endif // ifdef HAVE_MBRTOWC
-#endif // PY_VERSION < 3.7
 
     return res;
 oom:
@@ -212,9 +204,6 @@ oom:
 
     return NULL;
 } // char2wchar
-
-#endif // if PY_MAJOR_VERSION >= 3
-
 
 NATRON_NAMESPACE_ENTER
 AppManagerPrivate::AppManagerPrivate()
@@ -252,10 +241,8 @@ AppManagerPrivate::AppManagerPrivate()
     , nThreadsMutex()
     , runningThreadsCount()
     , lastProjectLoadedCreatedDuringRC2Or3(false)
-#if PY_MAJOR_VERSION >= 3
     , commandLineArgsWideOriginal()
     , commandLineArgsWide()
-#endif
     , commandLineArgsUtf8Original()
     , commandLineArgsUtf8()
     , nArgs(0)
@@ -282,10 +269,8 @@ AppManagerPrivate::AppManagerPrivate()
 
     runningThreadsCount = 0;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) && defined(__NATRON_LINUX__)
+#if defined(__NATRON_LINUX__)
     onWayland = qEnvironmentVariableIsSet("WAYLAND_DISPLAY") && !qEnvironmentVariableIsSet("NATRON_DISABLE_WAYLAND");
-#else
-    onWayland = false;
 #endif
 }
 
@@ -296,12 +281,9 @@ AppManagerPrivate::~AppManagerPrivate()
     for (std::size_t i = 0; i < commandLineArgsUtf8Original.size(); ++i) {
         free(commandLineArgsUtf8Original[i]);
     }
-#if PY_MAJOR_VERSION >= 3
-    // Python 3
     for (std::size_t i = 0; i < commandLineArgsWideOriginal.size(); ++i) {
         free(commandLineArgsWideOriginal[i]);
     }
-#endif
 }
 
 #ifdef NATRON_USE_BREAKPAD
@@ -466,6 +448,10 @@ template <typename T>
 void
 saveCache(Cache<T>* cache)
 {
+    if (!cache) {
+        return;
+    }
+
     std::string cacheRestoreFilePath = cache->getRestoreFilePath();
     FStreamsSupport::ofstream ofile;
     FStreamsSupport::open(&ofile, cacheRestoreFilePath);
@@ -607,13 +593,10 @@ AppManagerPrivate::cleanUpCacheDiskStructure(const QString & cachePath, bool isT
 
     QDir cacheFolder(cachePath);
 
-#   if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    QtCompat::removeRecursively(cachePath);
-#   else
     if ( cacheFolder.exists() ) {
         cacheFolder.removeRecursively();
     }
-#endif
+
     if ( !cacheFolder.exists() ) {
         bool success = cacheFolder.mkpath( QChar::fromLatin1('.') );
         if (!success) {
@@ -1182,26 +1165,17 @@ void
 AppManagerPrivate::copyUtf8ArgsToMembers(const std::vector<std::string>& utf8Args)
 {
     // Copy command line args to local members that live throughout the lifetime of AppManager
-#if PY_MAJOR_VERSION >= 3
-    // Python 3
     commandLineArgsWideOriginal.resize(utf8Args.size());
-#endif
     commandLineArgsUtf8Original.resize(utf8Args.size());
     nArgs = (int)utf8Args.size();
     for (std::size_t i = 0; i < utf8Args.size(); ++i) {
         commandLineArgsUtf8Original[i] = strdup(utf8Args[i].c_str());
 
         // Python 3 needs wchar_t arguments
-#if PY_MAJOR_VERSION >= 3
-        // Python 3
         commandLineArgsWideOriginal[i] = char2wchar(utf8Args[i].c_str());
-#endif
     }
     commandLineArgsUtf8 = commandLineArgsUtf8Original;
-#if PY_MAJOR_VERSION >= 3
-    // Python 3
     commandLineArgsWide = commandLineArgsWideOriginal;
-#endif
 }
 
 void

@@ -32,11 +32,9 @@
 #include <set>
 #include <map>
 #include <list>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-#include <QtCore/QRecursiveMutex>
-#endif
+#include <QString>
+#include <QStringList>
+#include <QRecursiveMutex>
 
 #include "Global/Enums.h"
 #include "Engine/EngineFwd.h"
@@ -171,14 +169,11 @@ class Plugin
     QString _pythonModule;
     OFX::Host::ImageEffect::ImageEffectPlugin* _ofxPlugin;
     OFX::Host::ImageEffect::Descriptor* _ofxDescriptor;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QRecursiveMutex* _lock;
-#else
-    QMutex* _lock;
-#endif
+
     int _majorVersion;
     int _minorVersion;
-    NATRON_ENUM::ContextEnum _ofxContext;
+    Natron::ContextEnum _ofxContext;
     mutable bool _hasShortcutSet; //< to speed up the keypress event of Nodegraph, this is used to find out quickly whether it has a shortcut or not.
     bool _isReader, _isWriter;
 
@@ -200,7 +195,7 @@ class Plugin
     bool _multiThreadingEnabled;
     bool _openglActivated;
 
-    NATRON_ENUM::PluginOpenGLRenderSupport _openglRenderSupport;
+    Natron::PluginOpenGLRenderSupport _openglRenderSupport;
 
 public:
 
@@ -241,11 +236,8 @@ public:
            const QString & iconFilePath,
            const QStringList & groupIconFilePath,
            const QStringList & grouping,
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
            QRecursiveMutex* lock,
-#else
-           QMutex* lock,
-#endif
+
            int majorVersion,
            int minorVersion,
            bool isReader,
@@ -344,11 +336,8 @@ public:
 
     bool getToolsetScript() const;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QRecursiveMutex* getPluginLock() const;
-#else
-    QMutex* getPluginLock() const;
-#endif
+
     LibraryBinary* getLibraryBinary() const;
 
     int getMajorVersion() const;
@@ -368,9 +357,9 @@ public:
     void setOfxPlugin(OFX::Host::ImageEffect::ImageEffectPlugin* p);
 
     OFX::Host::ImageEffect::ImageEffectPlugin* getOfxPlugin() const;
-    OFX::Host::ImageEffect::Descriptor* getOfxDesc(NATRON_ENUM::ContextEnum* ctx) const;
+    OFX::Host::ImageEffect::Descriptor* getOfxDesc(Natron::ContextEnum* ctx) const;
 
-    void setOfxDesc(OFX::Host::ImageEffect::Descriptor* desc, NATRON_ENUM::ContextEnum ctx);
+    void setOfxDesc(OFX::Host::ImageEffect::Descriptor* desc, Natron::ContextEnum ctx);
 
     bool isRenderScaleEnabled() const;
     void setRenderScaleEnabled(bool b);
@@ -384,8 +373,8 @@ public:
     bool isOpenGLEnabled() const;
     void setOpenGLEnabled(bool b);
 
-    void setOpenGLRenderSupport(NATRON_ENUM::PluginOpenGLRenderSupport support);
-    NATRON_ENUM::PluginOpenGLRenderSupport getPluginOpenGLRenderSupport() const;
+    void setOpenGLRenderSupport(Natron::PluginOpenGLRenderSupport support);
+    Natron::PluginOpenGLRenderSupport getPluginOpenGLRenderSupport() const;
 };
 
 struct Plugin_compare_version

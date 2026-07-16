@@ -56,7 +56,7 @@
 #include <sstream> // stringstream
 #include <locale>
 
-#include <QtCore/QtGlobal> // for Q_OS_*
+#include <QtGlobal> // for Q_OS_*
 #if defined(Q_OS_LINUX)
 #include <sys/signal.h>
 #ifndef __USE_GNU
@@ -85,17 +85,16 @@
 #include <ceres/version.h>
 #include <openMVG/version.hpp>
 
-#include <QtCore/QDateTime>
-#include <QtCore/QDebug>
-#include <QtCore/QDir>
-#include <QtCore/QTextCodec>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QSettings>
-#include <QtCore/QThreadPool>
-#include <QtCore/QTextStream>
-#include <QtNetwork/QAbstractSocket>
-#include <QtNetwork/QLocalServer>
-#include <QtNetwork/QLocalSocket>
+#include <QDateTime>
+#include <QDebug>
+#include <QDir>
+#include <QCoreApplication>
+#include <QSettings>
+#include <QThreadPool>
+#include <QTextStream>
+#include <QAbstractSocket>
+#include <QLocalServer>
+#include <QLocalSocket>
 
 
 #include "Global/ProcInfo.h"
@@ -142,10 +141,6 @@
 #include "sbkversion.h" // shiboken/pyside version
 
 #include "AppManagerPrivate.h" // include breakpad after Engine, because it includes /usr/include/AssertMacros.h on OS X which defines a check(x) macro, which conflicts with boost
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-Q_DECLARE_METATYPE(QAbstractSocket::SocketState)
-#endif
 
 NATRON_NAMESPACE_ENTER
 
@@ -315,24 +310,10 @@ AppManager::loadFromArgs(const CLArgs& cl)
 {
 
 #ifdef DEBUG
-#if PY_MAJOR_VERSION >= 3
     for (std::size_t i = 0; i < _imp->commandLineArgsWide.size(); ++i) {
         std::cout << "argv[" << i << "] = " << StrUtils::utf16_to_utf8( std::wstring(_imp->commandLineArgsWide[i]) ) << std::endl;
     }
-#else
-    for (std::size_t i = 0; i < _imp->commandLineArgsUtf8.size(); ++i) {
-        std::cout << "argv[" << i << "] = " << _imp->commandLineArgsUtf8[i] << std::endl;
-    }
 #endif
-#endif
-
-    // Ensure Qt knows C-strings are UTF-8 before creating the QApplication for argv
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    // be forward compatible: source code is UTF-8, and Qt5 assumes UTF-8 by default
-    QTextCodec::setCodecForCStrings( QTextCodec::codecForName("UTF-8") );
-    QTextCodec::setCodecForTr( QTextCodec::codecForName("UTF-8") );
-#endif
-
 
     // This needs to be done BEFORE creating qApp because
     // on Linux, X11 will create a context that would corrupt
@@ -475,9 +456,15 @@ AppManager::~AppManager()
     QThreadPool::globalInstance()->waitForDone();
 
     ///Kill caches now because decreaseNCacheFilesOpened can be called
-    _imp->_nodeCache->waitForDeleterThread();
-    _imp->_diskCache->waitForDeleterThread();
-    _imp->_viewerCache->waitForDeleterThread();
+    if (_imp->_nodeCache) {
+        _imp->_nodeCache->waitForDeleterThread();
+    }
+    if (_imp->_diskCache) {
+        _imp->_diskCache->waitForDeleterThread();
+    }
+    if (_imp->_viewerCache) {
+        _imp->_viewerCache->waitForDeleterThread();
+    }
     _imp->_nodeCache.reset();
     _imp->_viewerCache.reset();
     _imp->_diskCache.reset();
@@ -1777,11 +1764,7 @@ addToPythonPathFunctor(const QDir& directory)
     std::string addToPythonPath("sys.path.append(str('");
 
     addToPythonPath += directory.absolutePath().toStdString();
-#if PY_MAJOR_VERSION >= 3
     addToPythonPath += "'))\n";
-#else
-    addToPythonPath += "').decode('utf-8'))\n";
-#endif
 
     std::string err;
     bool ok  = NATRON_PYTHON_NAMESPACE::interpretPythonScript(addToPythonPath, &err, 0);
@@ -2036,18 +2019,10 @@ AppManager::registerPlugin(const QString& resourcesPath,
                            int minor,
                            bool isDeprecated)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     QRecursiveMutex* pluginMutex = nullptr;
-#else
-    QMutex* pluginMutex = 0;
-#endif
 
     if (mustCreateMutex) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         pluginMutex = new QRecursiveMutex();
-#else
-        pluginMutex = new QMutex(QMutex::Recursive);
-#endif
     }
     Plugin* plugin = new Plugin(binary, resourcesPath, pluginID, pluginLabel, pluginIconPath, groupIconPath, groups, pluginMutex, major, minor,
                                 isReader, isWriter, isDeprecated);
@@ -2529,9 +2504,6 @@ AppManager::registerEngineMetaTypes() const
     qRegisterMetaType<ViewSpec>("ViewSpec");
     qRegisterMetaType<NodePtr>("NodePtr");
     qRegisterMetaType<std::list<double> >("std::list<double>");
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    qRegisterMetaType<QAbstractSocket::SocketState>("SocketState");
-#endif
 }
 
 void
@@ -2980,11 +2952,7 @@ AppManager::initPython()
     ///Must be called prior to Py_Initialize (calls PyImport_AppendInittab())
     initBuiltinPythonModules();
     
-#if PY_MAJOR_VERSION >= 3
     _imp->mainModule = NATRON_PYTHON_NAMESPACE::initializePython3(_imp->commandLineArgsWide);
-#else
-    _imp->mainModule = NATRON_PYTHON_NAMESPACE::initializePython2(_imp->commandLineArgsUtf8);
-#endif
 
     std::string err;
     std::string modulename = NATRON_ENGINE_PYTHON_MODULE_NAME;
@@ -3035,11 +3003,7 @@ AppManager::initPython()
     }
     // Set QT_API for QtPy
     // https://github.com/spyder-ide/qtpy
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-    qputenv("QT_API", "pyside");
-#else
     qputenv("QT_API", "pyside2");
-#endif
 } // AppManager::initPython
 
 void
@@ -3080,23 +3044,13 @@ AppManager::getMainModule()
 ///The symbol has been generated by Shiboken in  Engine/NatronEngine/natronengine_module_wrapper.cpp
 extern "C"
 {
-#if PY_MAJOR_VERSION >= 3
-// Python 3
 PyObject* PyInit_NatronEngine();
-#else
-void initNatronEngine();
-#endif
 }
 
 void
 AppManager::initBuiltinPythonModules()
 {
-#if PY_MAJOR_VERSION >= 3
-    // Python 3
     int ret = PyImport_AppendInittab(NATRON_ENGINE_PYTHON_MODULE_NAME, &PyInit_NatronEngine);
-#else
-    int ret = PyImport_AppendInittab(NATRON_ENGINE_PYTHON_MODULE_NAME, &initNatronEngine);
-#endif
     if (ret == -1) {
         throw std::runtime_error("Failed to initialize built-in Python module.");
     }
@@ -3148,12 +3102,7 @@ AppManager::launchPythonInterpreter()
     assert(PyGILState_Check()); // Not available prior to Python 3.4
 #endif
 
-#if PY_MAJOR_VERSION >= 3
-    // Python 3
     Py_Main(1, &_imp->commandLineArgsWide[0]);
-#else
-    Py_Main(1, &_imp->commandLineArgsUtf8[0]);
-#endif
 }
 
 int
@@ -3667,11 +3616,7 @@ NATRON_PYTHON_NAMESPACE::interpretPythonScript(const std::string& script,
                 Py_DECREF(pyStr);
 
                 // See if we can get a full traceback
-#if PY_MAJOR_VERSION >= 3
                 PyObject* module_name = PyUnicode_FromString("traceback");
-#else
-                PyObject* module_name = PyString_FromString("traceback");
-#endif
                 PyObject* pyth_module = PyImport_Import(module_name);
                 Py_DECREF(module_name);
 
@@ -3686,11 +3631,7 @@ NATRON_PYTHON_NAMESPACE::interpretPythonScript(const std::string& script,
                     if (pyth_func && PyCallable_Check(pyth_func)) {
                         PyObject *pyth_val = PyObject_CallFunctionObjArgs(pyth_func, pyExcType, pyExcValue, pyExcTraceback, NULL);
                         if (pyth_val) {
-#if PY_MAJOR_VERSION >= 3
                             PyObject *emptyString = PyUnicode_FromString("");
-#else
-                            PyObject *emptyString = PyString_FromString("");
-#endif
                             PyObject *strList = PyObject_CallMethod(emptyString, (char*)"join", (char*)"(O)", pyth_val);
                             Py_DECREF(emptyString);
                             Py_DECREF(pyth_val);
@@ -4248,7 +4189,7 @@ NATRON_PYTHON_NAMESPACE::getFunctionArguments(const std::string& pyFunc,
 #endif
     std::stringstream ss;
     ss << "import inspect\n";
-    ss << "args_spec = inspect.getargspec(" << pyFunc << ")\n";
+    ss << "args_spec = inspect.getfullargspec(" << pyFunc << ")\n";
     std::string script = ss.str();
     std::string output;
     bool ok = NATRON_PYTHON_NAMESPACE::interpretPythonScript(script, error, &output);

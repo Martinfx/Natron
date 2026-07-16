@@ -25,12 +25,12 @@
 
 #include "SequenceFileDialog.h"
 
-#include <QtCore/QtGlobal> // for Q_OS_*
+#include <QtGlobal> // for Q_OS_*
 #if defined(Q_OS_UNIX)
 #include <pwd.h>
 #include <unistd.h> // for pathconf() on OS X
 #elif defined(Q_OS_WIN)
-#  include <QtCore/qt_windows.h>
+#  include <qt_windows.h>
 #endif
 #include <cassert>
 #include <locale>
@@ -42,7 +42,7 @@ CLANG_DIAG_OFF(uninitialized)
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
-#include <QtGui/QPainter>
+#include <QPainter>
 #include <QListView>
 #include <QHeaderView>
 #include <QCheckBox>
@@ -50,7 +50,7 @@ CLANG_DIAG_OFF(uninitialized)
 #include <QFileSystemModel>
 //#include <QInputDialog>
 #include <QSplitter>
-#include <QtGui/QIcon>
+#include <QIcon>
 #include <QDialog>
 #include <QScrollBar>
 #include <QFileDialog>
@@ -58,27 +58,19 @@ CLANG_DIAG_OFF(uninitialized)
 #include <QFileIconProvider>
 GCC_DIAG_UNUSED_PRIVATE_FIELD_OFF
 // /opt/local/include/QtGui/qmime.h:119:10: warning: private field 'type' is not used [-Wunused-private-field]
-#include <QtGui/QKeyEvent>
+#include <QKeyEvent>
 GCC_DIAG_UNUSED_PRIVATE_FIELD_ON
-#include <QtGui/QColor>
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QStylePainter>
-#include <QtGui/QStyleOptionViewItem>
-#include <QtGui/QDesktopServices>
-#else
-#include <QtWidgets/QAction>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QStylePainter>
-#include <QtWidgets/QStyleOptionViewItem>
+#include <QColor>
+#include <QAction>
+#include <QApplication>
+#include <QStylePainter>
+#include <QStyleOptionViewItem>
 #include <QStandardPaths>
-#endif
-#include <QtCore/QDebug>
-#include <QtCore/QEvent>
-#include <QtCore/QMimeData>
+#include <QDebug>
+#include <QEvent>
+#include <QMimeData>
 #include <QtConcurrentRun> // QtCore on Qt4, QtConcurrent on Qt5
-#include <QtCore/QSettings>
+#include <QSettings>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
 
@@ -142,7 +134,7 @@ static void removeTrailingSlash(QString& str) {
 }
 
 static QString urlToPathString(const QUrl& url) {
-    return QtCompat::toLocalFileUrlFixed(url).toLocalFile();
+    return url.toLocalFile();
 }
 
 static QString bookmarkToUrlPath(const QUrl& bookmark) {
@@ -1248,11 +1240,7 @@ SequenceItemDelegate::sizeHint(const QStyleOptionViewItem & option,
     QString str =  index.data(FileSystemModel::FilePathRole).toString();
     QFontMetrics metric(option.font);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
     return QSize( metric.horizontalAdvance(str), metric.height() );
-#else
-    return QSize( metric.width(str), metric.height() );
-#endif
 }
 
 void
@@ -2464,12 +2452,7 @@ FileDialogComboBox::sizeHint() const
     if ( (index >= 0) && ( index < count() ) ) {
         QFontMetrics fm = fontMetrics();
         QString txt = itemText(index);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
         int w = fm.horizontalAdvance(txt);
-#else
-        int w = fm.width(txt);
-#endif
-
         return QSize(w + 10, fm.height() * 1.5);
     }
 

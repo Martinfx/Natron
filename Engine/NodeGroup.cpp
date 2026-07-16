@@ -34,8 +34,8 @@
 #include <sstream> // stringstream
 #include <limits>
 
-#include <QtCore/QCoreApplication>
-#include <QtCore/QTextStream>
+#include <QCoreApplication>
+#include <QTextStream>
 
 #include "Engine/AppInstance.h"
 #include "Engine/Bezier.h"
@@ -1055,11 +1055,8 @@ NodeCollection::getParallelRenderArgs(std::map<NodePtr, ParallelRenderArgsPtr>& 
 
 struct NodeGroupPrivate
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     mutable QRecursiveMutex nodesLock;
-#else
-    mutable QMutex nodesLock; // protects inputs & outputs
-#endif
+
     std::vector<NodeWPtr> inputs, guiInputs;
     NodesWList outputs, guiOutputs;
     bool isDeactivatingGroup;
@@ -1068,11 +1065,7 @@ struct NodeGroupPrivate
     KnobButtonPtr exportAsTemplate, convertToGroup;
 
     NodeGroupPrivate()
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     : nodesLock()
-#else
-    : nodesLock(QMutex::Recursive)
-#endif
     , inputs()
     , guiInputs()
     , outputs()
@@ -2843,12 +2836,12 @@ NodeCollection::exportGroupToPython(const QString& pluginID,
     WRITE_STATIC_LINE(NATRON_PYPLUG_MAGIC);
     QString descline = QString( QString::fromUtf8(NATRON_PYPLUG_GENERATED "%1 PyPlug exporter version %2.") ).arg( QString::fromUtf8(NATRON_APPLICATION_NAME) ).arg(NATRON_PYPLUG_EXPORTER_VERSION);
     WRITE_STRING(descline);
-    WRITE_STATIC_LINE();
+    WRITE_STATIC_LINE("");
     QString handWrittenStr = QString::fromUtf8("# Hand-written code should be added in a separate file named %1.py").arg(extModule);
     WRITE_STRING(handWrittenStr);
     WRITE_STATIC_LINE("# See http://natron.readthedocs.org/en/master/devel/groups.html#adding-hand-written-code-callbacks-etc");
     WRITE_STATIC_LINE("# Note that Viewers are never exported");
-    WRITE_STATIC_LINE();
+    WRITE_STATIC_LINE("");
     WRITE_STATIC_LINE("import " NATRON_ENGINE_PYTHON_MODULE_NAME);
     WRITE_STATIC_LINE("import sys");
     WRITE_STATIC_LINE("");

@@ -38,8 +38,8 @@ GCC_DIAG_UNUSED_PRIVATE_FIELD_ON
 #include <QDragMoveEvent>
 #include <QDropEvent>
 #include <QKeySequence>
-#include <QtCore/QUrl>
-#include <QtCore/QMimeData>
+#include <QUrl>
+#include <QMimeData>
 #include <QStyle>
 CLANG_DIAG_ON(deprecated)
 CLANG_DIAG_ON(uninitialized)
@@ -87,7 +87,7 @@ LineEdit::dropEvent(QDropEvent* e)
     QList<QUrl> urls = e->mimeData()->urls();
     QString path;
     if (urls.size() > 0) {
-        path = QtCompat::toLocalFileUrlFixed( urls.at(0) ).toLocalFile();
+        path = urls.at(0).toLocalFile();
     }
     if ( !path.isEmpty() ) {
         setText(path);

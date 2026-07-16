@@ -18,16 +18,16 @@
 # ***** END LICENSE BLOCK *****
 
 set(NatronRenderer_SOURCES NatronRenderer_main.cpp)
-if(WINDOWS)
+if(WIN32)
     list(APPEND NatronRenderer_SOURCES ../Natron.rc)
 endif()
 add_executable(NatronRenderer ${NatronRenderer_SOURCES})
 target_link_libraries(NatronRenderer
     PRIVATE
         NatronEngine
-        Qt5::Core
-        Qt5::Concurrent
-        Qt5::Network
+        Qt::Core
+        Qt::Concurrent
+        Qt::Network
         Python3::Python
 )
 target_include_directories(NatronRenderer

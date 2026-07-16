@@ -40,15 +40,15 @@ use_parallel_build              yes
 set docdir ${prefix}/share/doc/${name}
 post-destroot {
     xinstall -d ${destroot}${docdir}
-    xinstall -W ${worksrcpath} COPYING NEWS README TODO history.adoc ${destroot}${docdir}
-    xinstall -m 644 {*}[glob ${worksrcpath}/doc/*.1] ${destroot}${prefix}/share/man/man1
+    xinstall -W ${worksrcpath} -m 0644 COPYING NEWS README TODO history.adoc ${destroot}${docdir}
+    xinstall -m 0444 {*}[glob ${worksrcpath}/doc/*.1] ${destroot}${prefix}/share/man/man1
 }
 
 variant doc description {Install HTML documentation} {
     depends_build-append        port:xmlto
     post-destroot {
         xinstall -d ${destroot}${docdir}/html
-        xinstall -m 644 {*}[glob ${worksrcpath}/doc/*.html] ${destroot}${docdir}/html
+        xinstall -m 0644 {*}[glob ${worksrcpath}/doc/*.html] ${destroot}${docdir}/html
     }
 }
 

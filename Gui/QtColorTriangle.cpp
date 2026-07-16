@@ -215,17 +215,13 @@ void QtColorTriangle::genBackground()
     // Create an image of the same size as the contents rect.
     bg = QImage(contentsRect().size(), QImage::Format_RGB32);
     QPainter p(&bg);
-    p.setRenderHint(QPainter::HighQualityAntialiasing);
+    p.setRenderHint(QPainter::Antialiasing);
     p.fillRect(bg.rect(), palette().mid());
 
     QConicalGradient gradient(bg.rect().center(), 90);
     QColor color;
     for (double i = 0; i <= 1.0; i += 0.1) {
-#if QT_VERSION < 0x040100
-        color.setHsv(int(i * 360.0), 255, 255);
-#else
         color.setHsv(int(360.0 - (i * 360.0)), 255, 255);
-#endif
         gradient.setColorAt(i, color);
     }
 

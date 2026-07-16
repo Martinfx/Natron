@@ -32,7 +32,7 @@
 #include <list>
 
 CLANG_DIAG_OFF(deprecated)
-#include <QtCore/QMutex>
+#include <QMutex>
 CLANG_DIAG_ON(deprecated)
 
 //ofx
@@ -261,7 +261,7 @@ public:
         //View may be involved in a recursive action
         std::list<ViewIdx> view;
         //mipmaplevel may be involved in a recursive action
-        std::list<unsigned int> mipMapLevel;
+        std::list<unsigned int> mipmapLevel;
 
         //////////////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////
@@ -279,7 +279,7 @@ public:
 
         ClipTLSData()
             : view()
-            , mipMapLevel()
+            , mipmapLevel()
             , componentsPresent()
             , unmappedComponents()
         {
@@ -287,7 +287,7 @@ public:
 
         ClipTLSData(const ClipTLSData& other)
             : view(other.view)
-            , mipMapLevel(other.mipMapLevel)
+            , mipmapLevel(other.mipmapLevel)
             , renderData()
             , componentsPresent(other.componentsPresent)
             , unmappedComponents(other.unmappedComponents)
