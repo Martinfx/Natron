@@ -23,6 +23,7 @@ introduced where needed.
 
     overview
     building
+    build-macos
     codebase-map
     architecture
     design-techniques
